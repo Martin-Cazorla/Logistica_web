@@ -1,0 +1,271 @@
+// Variables de Estilo Logística 
+$verde-logistica: #2d7a44; 
+$verde-hover: #246136;
+$header-bg: #000000;
+$header-text: #ffffff;
+$cell-bg: #e8f0fe; 
+$border-color: #999999;
+$danger-red: #dc3545;
+$gray-dark: #4a4a4a;
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background-color: #f0f4f1; 
+    padding: 20px;
+}
+
+h1 {
+    color: $verde-logistica;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+// Contenedor de Resumen
+.resumen-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: white;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border-top: 5px solid $verde-logistica; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.filtros-container {
+    display: flex;
+    gap: 20px;
+    
+    .filtro-grupo {
+        display: flex;
+        flex-direction: column;
+        
+        label {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        input {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+    }
+}
+
+.kpi-card {
+    text-align: center;
+    .kpi-label {
+        display: block;
+        font-weight: bold;
+        color: #555;
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+    }
+    .kpi-value {
+        font-size: 1.8rem;
+        color: $verde-logistica;
+        font-weight: bold;
+    }
+}
+
+// Botones Generales
+.btn-limpiar {
+    background-color: $danger-red;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s;
+    &:hover { background-color: #a71d2a; }
+}
+
+.btn-excel {
+    background-color: #1d6f42;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-right: 10px;
+    transition: background 0.3s;
+    &:hover { background-color: #144e2e; }
+}
+
+.btn-historial {
+    background-color: $gray-dark; 
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    text-decoration: none; 
+    display: inline-block;
+    transition: background 0.3s;
+    &:hover { background-color: #333333; }
+}
+
+.acciones-botones {
+    display: flex;
+    gap: 10px;
+}
+
+// Estilo de la Tabla
+.tabla-logistica {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+
+    thead th {
+        background-color: $header-bg;
+        color: $header-text;
+        padding: 10px;
+        border: 1px solid $border-color;
+        font-size: 13px;
+        text-transform: uppercase;
+    }
+
+    tbody td {
+        padding: 8px;
+        border: 1px solid $border-color;
+        background-color: $cell-bg; 
+        font-size: 13px;
+        text-align: center;
+        height: 30px; 
+    }
+
+    .cell-fecha {
+        background-color: #f0f0f0 !important;
+        color: #666;
+        font-weight: bold;
+    }
+
+    input, select {
+        width: 95%;
+        border: 1px solid #ccc;
+        padding: 4px;
+        font-family: inherit;
+        background-color: white;
+    }
+
+    .col-obs {
+        min-width: 200px;
+        input { text-align: left; width: 95%; }
+    }
+
+    .status-extra {
+        background-color: #fff3cd !important;
+        color: #856404 !important;
+        font-weight: bold;
+    }
+}
+
+// Ventana Modal de Edición - Centrado y Ajuste de Pantalla
+.modal {
+    display: none; 
+    position: fixed; 
+    z-index: 2000; // Aumentamos el z-index por seguridad
+    left: 0; 
+    top: 0; 
+    width: 100%; 
+    height: 100%; 
+    background-color: rgba(0,0,0,0.6);
+    backdrop-filter: blur(3px);
+    
+    // ESTO ES LO CLAVE: Centrado absoluto en el medio de la pantalla
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+    padding: 20px; // Espacio de seguridad para que no toque los bordes
+
+    &-content {
+        background-color: white;
+        margin: auto; // Refuerza el centrado
+        padding: 0;
+        border-radius: 8px;
+        width: 100%;
+        max-width: 400px;
+        
+        // LIMITAMOS LA ALTURA: para que no baje de la barra de Windows
+        max-height: 80vh; 
+        
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column; 
+        animation: animarsuperior 0.3s ease-out;
+    }
+
+    &-header {
+        background-color: $verde-logistica;
+        color: white;
+        padding: 12px 20px;
+        flex-shrink: 0; // El encabezado no se achica
+        h3 { margin: 0; font-size: 1.1rem; }
+    }
+
+    &-body {
+        padding: 20px;
+        overflow-y: auto; // Si hay mucho contenido, sale el scroll AQUÍ
+        flex-grow: 1;    // Toma el espacio disponible
+        
+        .form-group {
+            margin-bottom: 12px;
+            label { display: block; margin-bottom: 4px; font-weight: bold; font-size: 0.9rem; text-align: left; }
+            input, select { 
+                width: 100%; 
+                padding: 8px; 
+                border: 1px solid #ccc; 
+                border-radius: 4px; 
+                box-sizing: border-box; 
+            }
+        }
+    }
+
+    &-footer {
+        padding: 12px 20px;
+        background-color: #f8f9fa;
+        text-align: right;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        border-top: 1px solid #dee2e6;
+        flex-shrink: 0; // El pie de página SIEMPRE se queda visible abajo
+
+        .btn-guardar {
+            background-color: $verde-logistica;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            &:hover { background-color: $verde-hover; }
+        }
+
+        .btn-cancelar {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            &:hover { background-color: #5a6268; }
+        }
+    }
+}
+
+// Ajuste de la animación para que salga desde el centro
+@keyframes animarsuperior {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}

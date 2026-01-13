@@ -1,0 +1,10 @@
+# SASS Maps
+*.css.map
+.sass-cache/
+
+# Extension settings
+.vscode/
+
+# OS generated files
+.DS_Store
+Thumbs.db

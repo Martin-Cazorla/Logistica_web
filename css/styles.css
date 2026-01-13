@@ -1,0 +1,264 @@
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  background-color: #f0f4f1;
+  padding: 20px;
+}
+
+h1 {
+  color: #2d7a44;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.resumen-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: white;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  border-top: 5px solid #2d7a44;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.filtros-container {
+  display: flex;
+  gap: 20px;
+}
+.filtros-container .filtro-grupo {
+  display: flex;
+  flex-direction: column;
+}
+.filtros-container .filtro-grupo label {
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #666;
+  margin-bottom: 5px;
+}
+.filtros-container .filtro-grupo input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.kpi-card {
+  text-align: center;
+}
+.kpi-card .kpi-label {
+  display: block;
+  font-weight: bold;
+  color: #555;
+  font-size: 0.9rem;
+  margin-bottom: 5px;
+}
+.kpi-card .kpi-value {
+  font-size: 1.8rem;
+  color: #2d7a44;
+  font-weight: bold;
+}
+
+.btn-limpiar {
+  background-color: #dc3545;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+.btn-limpiar:hover {
+  background-color: #a71d2a;
+}
+
+.btn-excel {
+  background-color: #1d6f42;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-right: 10px;
+  transition: background 0.3s;
+}
+.btn-excel:hover {
+  background-color: #144e2e;
+}
+
+.btn-historial {
+  background-color: #4a4a4a;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  text-decoration: none;
+  display: inline-block;
+  transition: background 0.3s;
+}
+.btn-historial:hover {
+  background-color: #333333;
+}
+
+.acciones-botones {
+  display: flex;
+  gap: 10px;
+}
+
+.tabla-logistica {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+}
+.tabla-logistica thead th {
+  background-color: #000000;
+  color: #ffffff;
+  padding: 10px;
+  border: 1px solid #999999;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+.tabla-logistica tbody td {
+  padding: 8px;
+  border: 1px solid #999999;
+  background-color: #e8f0fe;
+  font-size: 13px;
+  text-align: center;
+  height: 30px;
+}
+.tabla-logistica .cell-fecha {
+  background-color: #f0f0f0 !important;
+  color: #666;
+  font-weight: bold;
+}
+.tabla-logistica input, .tabla-logistica select {
+  width: 95%;
+  border: 1px solid #ccc;
+  padding: 4px;
+  font-family: inherit;
+  background-color: white;
+}
+.tabla-logistica .col-obs {
+  min-width: 200px;
+}
+.tabla-logistica .col-obs input {
+  text-align: left;
+  width: 95%;
+}
+.tabla-logistica .status-extra {
+  background-color: #fff3cd !important;
+  color: #856404 !important;
+  font-weight: bold;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 2000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  -webkit-backdrop-filter: blur(3px);
+          backdrop-filter: blur(3px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+.modal-content {
+  background-color: white;
+  margin: auto;
+  padding: 0;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 400px;
+  max-height: 80vh;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: animarsuperior 0.3s ease-out;
+}
+.modal-header {
+  background-color: #2d7a44;
+  color: white;
+  padding: 12px 20px;
+  flex-shrink: 0;
+}
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+.modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+.modal-body .form-group {
+  margin-bottom: 12px;
+}
+.modal-body .form-group label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  text-align: left;
+}
+.modal-body .form-group input, .modal-body .form-group select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+.modal-footer {
+  padding: 12px 20px;
+  background-color: #f8f9fa;
+  text-align: right;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  border-top: 1px solid #dee2e6;
+  flex-shrink: 0;
+}
+.modal-footer .btn-guardar {
+  background-color: #2d7a44;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+.modal-footer .btn-guardar:hover {
+  background-color: #246136;
+}
+.modal-footer .btn-cancelar {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.modal-footer .btn-cancelar:hover {
+  background-color: #5a6268;
+}
+
+@keyframes animarsuperior {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}/*# sourceMappingURL=styles.css.map */

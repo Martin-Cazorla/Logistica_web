@@ -1,0 +1,261 @@
+// 1. Base de Datos Completa de Choferes
+const baseDeDatosChoferes = {
+    "99": { modelo: "Renault Master 2,5 DCL", tamaño: "Grande", chofer: "Carlos Vitale" },
+    "591": { modelo: "Citroen Jumper", tamaño: "Grande", chofer: "Emanuel Suarez" },
+    "130": { modelo: "Lifan Foison Box", tamaño: "Grande", chofer: "Maximiliano Ramos" },
+    "635": { modelo: "Peugeot Boxer 330M 2,3 HDI", tamaño: "Grande", chofer: "Oscar Calcada" },
+    "28": { modelo: "Peugeot Boxer", tamaño: "Grande", chofer: "Ignacio Monteagudo" },
+    "218": { modelo: "Mercedes Sprinter", tamaño: "Grande", chofer: "Gonzalo Morales" },
+    "126": { modelo: "Peugeot Boxer 330M 2,3 HDI Confort", tamaño: "Grande", chofer: "Jonathan Gimenez" },
+    "123": { modelo: "Peugeot Boxer 330M 2,3 HDI Confort", tamaño: "Grande", chofer: "Fabian Bustos" },
+    "170": { modelo: "Renault Nueva Master L1H1 AA", tamaño: "Grande", chofer: "Dante" },
+    "976": { modelo: "Renault Master", tamaño: "Grande", chofer: "Daniel Vietri" },
+    "21": { modelo: "Mercedes Sprinter", tamaño: "Grande", chofer: "Federico" },
+    "17": { modelo: "Mercedes Sprinter", tamaño: "Grande", chofer: "Cristian Miranda" },
+    "1017": { modelo: "Mercedes Sprinter", tamaño: "Grande", chofer: "Nahuel Alarcon" },
+    "1018": { modelo: "Mercedes Sprinter", tamaño: "Grande", chofer: "German Rivero" },
+    "173": { modelo: "Kangoo", tamaño: "Chica", chofer: "Ramiro Torrico" },
+    "927": { modelo: "Renault Master", tamaño: "Grande", chofer: "Daniel Martinez" },
+    "15": { modelo: "Fiat Fiorino Furgon 1,4", tamaño: "Chica", chofer: "Gonzalo Villagra" },
+    "101": { modelo: "Citroen Berlingo Furgon 1,9D Full", tamaño: "Chica", chofer: "Carlos Oliva" },
+    "640": { modelo: "Renault Kangoo II Express", tamaño: "Chica", chofer: "Sergio Soberon" },
+    "240": { modelo: "Fiat Nuevo Fiorino", tamaño: "Chica", chofer: "Nicolas Cordoba" },
+    "909": { modelo: "Renault Kangoo PH3", tamaño: "Chica", chofer: "Ricardo Heppner" },
+    "293": { modelo: "Renault Master 2,5 DCL", tamaño: "Grande", chofer: "Pablo Diaz Velez" },
+    "302": { modelo: "Kangoo", tamaño: "Chica", chofer: "Guillermo" },
+    "19": { modelo: "Sprinter", tamaño: "Grande", chofer: "Alex Molinari" },
+    "401": { modelo: "Fiat Fiorino Fire", tamaño: "Chica", chofer: "Cristian Acosta" },
+    "985": { modelo: "Flete", tamaño: "Chica", chofer: "Flete" },
+    "984": { modelo: "Flete", tamaño: "Chica", chofer: "Flete" },
+    "983": { modelo: "Flete", tamaño: "Chica", chofer: "Flete" },
+    "921": { modelo: "Mercedes Sprinter", tamaño: "Grande", chofer: "Luciano" }
+};
+
+let contadorFilas = 0;
+let datosHistorialCompleto = []; 
+
+function obtenerFechaHoy() {
+    const hoy = new Date();
+    return hoy.toLocaleDateString('es-AR');
+}
+
+// --- CARGA DIARIA ---
+function agregarFila() {
+    const tbody = document.getElementById("tabla-body");
+    if (!tbody) return; 
+    contadorFilas++;
+    const nuevaFila = document.createElement("tr");
+    nuevaFila.id = `fila-${contadorFilas}`;
+    nuevaFila.innerHTML = `
+        <td class="cell-fecha">${obtenerFechaHoy()}</td>
+        <td><select id="select-horario-${contadorFilas}" onchange="actualizarFila(${contadorFilas})">
+            <option value="10:00hs">10:00hs</option><option value="11:00hs">11:00hs</option>
+            <option value="Electro">Electro</option><option value="Agregado">Agregado</option>
+            <option value="No se presenta">No se presenta</option>
+        </select></td>
+        <td><input type="text" id="input-unidad-${contadorFilas}" oninput="actualizarFila(${contadorFilas})" onkeydown="revisarTecla(event, ${contadorFilas})" placeholder="N°"></td>
+        <td id="cell-modelo-${contadorFilas}">---</td><td id="cell-tamaño-${contadorFilas}">---</td><td id="cell-chofer-${contadorFilas}">---</td>
+        <td><select id="select-vueltas-${contadorFilas}"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></td>
+        <td><select id="select-extra-${contadorFilas}" onchange="actualizarFila(${contadorFilas})"><option value="0">0</option><option value="1">1</option></select></td>
+        <td class="col-obs"><input type="text" id="input-obs-${contadorFilas}" placeholder="..."></td>
+        <td id="cell-presencia-${contadorFilas}" class="presencia-dato">0</td>
+    `;
+    tbody.appendChild(nuevaFila);
+}
+
+function actualizarFila(idFila) {
+    const unidadId = document.getElementById(`input-unidad-${idFila}`).value;
+    const horario = document.getElementById(`select-horario-${idFila}`).value;
+    const extraValue = document.getElementById(`select-extra-${idFila}`).value;
+    const resultado = baseDeDatosChoferes[unidadId];
+    const filaElemento = document.getElementById(`fila-${idFila}`);
+    const cellPresencia = document.getElementById(`cell-presencia-${idFila}`);
+    const selectExtra = document.getElementById(`select-extra-${idFila}`);
+
+    if (resultado) {
+        document.getElementById(`cell-modelo-${idFila}`).innerText = resultado.modelo;
+        document.getElementById(`cell-tamaño-${idFila}`).innerText = resultado.tamaño;
+        document.getElementById(`cell-chofer-${idFila}`).innerText = resultado.chofer;
+        const esAusente = (horario === "No se presenta");
+        cellPresencia.innerText = esAusente ? "0" : "1";
+        if (esAusente) { filaElemento.classList.add("fila-ausente"); cellPresencia.classList.add("status-ausente"); }
+        else { filaElemento.classList.remove("fila-ausente"); cellPresencia.classList.remove("status-ausente"); }
+        if (extraValue === "1") selectExtra.classList.add("status-extra"); else selectExtra.classList.remove("status-extra");
+    } else {
+        ["modelo", "tamaño", "chofer"].forEach(id => { const el = document.getElementById(`cell-${id}-${idFila}`); if(el) el.innerText = "---"; });
+        cellPresencia.innerText = "0";
+    }
+    calcularTotales();
+}
+
+function calcularTotales() {
+    let totalUnidades = 0;
+    document.querySelectorAll(".presencia-dato").forEach(celda => totalUnidades += parseInt(celda.innerText));
+    const elUnidades = document.getElementById("contador-unidades");
+    if(elUnidades) elUnidades.innerText = totalUnidades;
+
+    let totalExtras = 0;
+    for (let i = 1; i <= contadorFilas; i++) {
+        const sel = document.getElementById(`select-extra-${i}`);
+        if (sel && sel.value === "1") totalExtras++;
+    }
+    const elExtras = document.getElementById("contador-extras");
+    if(elExtras) elExtras.innerText = totalExtras;
+}
+
+function revisarTecla(event, idFila) {
+    if ((event.keyCode === 13 || event.keyCode === 9) && idFila === contadorFilas) {
+        if (document.getElementById(`input-unidad-${idFila}`).value !== "") {
+            if(event.keyCode === 13) event.preventDefault();
+            agregarFila();
+            setTimeout(() => document.getElementById(`input-unidad-${contadorFilas}`).focus(), 10);
+        }
+    }
+}
+
+// --- EXPORTAR Y LIMPIAR ---
+function exportarExcel() {
+    const tablaOriginal = document.querySelector(".tabla-logistica");
+    if (!tablaOriginal) return;
+    const tablaClonada = tablaOriginal.cloneNode(true);
+    tablaClonada.querySelectorAll("tbody tr").forEach(fila => {
+        fila.querySelectorAll("select").forEach(sel => sel.parentElement.innerText = document.getElementById(sel.id).value);
+        fila.querySelectorAll("input").forEach(inp => inp.parentElement.innerText = document.getElementById(inp.id).value);
+    });
+    const hoja = XLSX.utils.table_to_sheet(tablaClonada);
+    const libro = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(libro, hoja, "Carga Diaria");
+    XLSX.writeFile(libro, `Logistica_${obtenerFechaHoy().replace(/\//g, '-')}.xlsx`);
+}
+
+function limpiarDia() {
+    if (confirm("¿Deseas archivar los datos de hoy?")) {
+        let historialActual = JSON.parse(localStorage.getItem("historialLogistica")) || [];
+        for (let i = 1; i <= contadorFilas; i++) {
+            const unid = document.getElementById(`input-unidad-${i}`).value;
+            if (unid !== "") {
+                historialActual.push({
+                    fecha: obtenerFechaHoy(),
+                    horario: document.getElementById(`select-horario-${i}`).value,
+                    unidad: unid,
+                    chofer: document.getElementById(`cell-chofer-${i}`).innerText,
+                    vueltas: document.getElementById(`select-vueltas-${i}`).value,
+                    extra: document.getElementById(`select-extra-${i}`).value,
+                    obs: document.getElementById(`input-obs-${i}`).value
+                });
+            }
+        }
+        localStorage.setItem("historialLogistica", JSON.stringify(historialActual));
+        document.getElementById("tabla-body").innerHTML = "";
+        contadorFilas = 0;
+        agregarFila();
+        calcularTotales();
+        alert("¡Archivado correctamente!");
+    }
+}
+
+// --- GESTIÓN DE HISTORIAL ---
+function renderizarTabla(lista) {
+    const tbody = document.getElementById("tabla-historial-body");
+    const contador = document.getElementById("total-registros");
+    if (!tbody) return;
+    tbody.innerHTML = "";
+    if (contador) contador.innerText = lista.length;
+
+    // Usamos reverse para ver lo más nuevo primero
+    [...lista].reverse().forEach((reg) => {
+        // BUSQUEDA CRÍTICA: Encontrar la posición real en el array principal
+        const indexReal = datosHistorialCompleto.indexOf(reg);
+
+        const fila = `<tr>
+            <td>${reg.fecha}</td>
+            <td>${reg.horario}</td>
+            <td>${reg.unidad}</td>
+            <td>${reg.chofer}</td>
+            <td>${reg.vueltas}</td>
+            <td>${reg.extra}</td>
+            <td>${reg.obs}</td>
+            <td>
+                <button onclick="abrirModalEditar(${indexReal})" style="cursor:pointer; background:none; border:none; font-size:1.2rem;">✏️</button>
+            </td>
+        </tr>`;
+        tbody.innerHTML += fila;
+    });
+}
+
+function filtrarHistorial() {
+    const fFecha = document.getElementById("filtro-fecha").value.toLowerCase().trim();
+    const fUnid = document.getElementById("filtro-unidad").value.toLowerCase().trim();
+    const resultados = datosHistorialCompleto.filter(reg => 
+        String(reg.fecha).toLowerCase().includes(fFecha) && String(reg.unidad).toLowerCase().includes(fUnid)
+    );
+    renderizarTabla(resultados);
+}
+
+function abrirModalEditar(indexReal) {
+    const reg = datosHistorialCompleto[indexReal];
+    if (!reg) return;
+
+    document.getElementById("edit-index").value = indexReal;
+    document.getElementById("edit-fecha").value = reg.fecha;
+    document.getElementById("edit-horario").value = reg.horario;
+    document.getElementById("edit-unidad").value = reg.unidad;
+    document.getElementById("edit-vueltas").value = reg.vueltas;
+    document.getElementById("edit-extra").value = reg.extra;
+    document.getElementById("edit-obs").value = reg.obs;
+
+    document.getElementById("modalEditar").style.display = "block";
+}
+
+function cerrarModal() { document.getElementById("modalEditar").style.display = "none"; }
+
+function guardarCambiosModal() {
+    const idx = document.getElementById("edit-index").value;
+    const nuevaUnid = document.getElementById("edit-unidad").value;
+
+    // Actualizamos el registro en el array principal usando el índice real
+    datosHistorialCompleto[idx].fecha = document.getElementById("edit-fecha").value;
+    datosHistorialCompleto[idx].horario = document.getElementById("edit-horario").value;
+    datosHistorialCompleto[idx].unidad = nuevaUnid;
+    datosHistorialCompleto[idx].vueltas = document.getElementById("edit-vueltas").value;
+    datosHistorialCompleto[idx].extra = document.getElementById("edit-extra").value;
+    datosHistorialCompleto[idx].obs = document.getElementById("edit-obs").value;
+
+    // Actualizar chofer si cambió la unidad
+    if (baseDeDatosChoferes[nuevaUnid]) {
+        datosHistorialCompleto[idx].chofer = baseDeDatosChoferes[nuevaUnid].chofer;
+    } else {
+        datosHistorialCompleto[idx].chofer = "---";
+    }
+
+    // Guardar en LocalStorage y refrescar
+    localStorage.setItem("historialLogistica", JSON.stringify(datosHistorialCompleto));
+    cerrarModal();
+    renderizarTabla(datosHistorialCompleto);
+}
+
+function exportarHistorialExcel() {
+    if (datosHistorialCompleto.length === 0) return alert("No hay datos.");
+    const hoja = XLSX.utils.json_to_sheet(datosHistorialCompleto);
+    const libro = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(libro, hoja, "Historial");
+    XLSX.writeFile(libro, "Historial_Completo.xlsx");
+}
+
+function borrarTodoElHistorial() {
+    if (confirm("⚠️ ¿Borrar TODO el historial?") && confirm("🛑 ¿Estás REALMENTE seguro?")) {
+        localStorage.removeItem("historialLogistica");
+        datosHistorialCompleto = [];
+        renderizarTabla([]);
+    }
+}
+
+window.onload = function() {
+    const esHistorial = document.getElementById("tabla-historial-body");
+    if (esHistorial) {
+        datosHistorialCompleto = JSON.parse(localStorage.getItem("historialLogistica")) || [];
+        renderizarTabla(datosHistorialCompleto);
+    } else {
+        agregarFila();
+    }
+};

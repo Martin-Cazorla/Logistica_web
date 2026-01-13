@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Logística E-commerce</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+    <h1>Panel de Carga Diaria - Envíos</h1>
+
+    <div class="resumen-container">
+        <div class="kpi-card">
+            <span class="kpi-label">UNIDADES PRESENTES</span>
+            <span id="contador-unidades" class="kpi-value">0</span>
+        </div>
+    
+        <div class="kpi-card">
+            <span class="kpi-label">TOTAL EXTRAS</span>
+            <span id="contador-extras" class="kpi-value">0</span>
+        </div>
+        <div class="acciones-botones">
+            <a href="pages/historial.html" class="btn-historial">VER HISTORIAL</a>
+    
+            <button class="btn-excel" onclick="exportarExcel()">DESCARGAR EXCEL</button>
+            <button class="btn-limpiar" onclick="limpiarDia()">ARCHIVAR Y LIMPIAR</button>
+        </div>
+    </div>
+
+    <table class="tabla-logistica">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Horario</th>
+                <th>Unidad</th>
+                <th>Modelo</th>
+                <th>Tamaño</th>
+                <th>Chofer</th>
+                <th>Vueltas</th> 
+                <th>Extra</th>   
+                <th>Observaciones</th> 
+                <th>Presencia</th>
+            </tr>
+        </thead>
+        <tbody id="tabla-body">
+        </tbody>
+    </table>
+
+    <script src="script.js"></script>
+</body>
+</html>
