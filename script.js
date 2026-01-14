@@ -32,8 +32,18 @@ const baseDeDatosChoferes = {
 };
 
 let contadorFilas = 0;
-let datosGlobales = []; // Para Dashboard e Historial
+let datosGlobales = []; 
 let chartInstance = null;
+
+// Ayudante para formatear fechas de input (YYYY-MM-DD) a formato DB (D/M/YYYY)
+function formatearFechaParaFiltro(fechaInput) {
+    if (!fechaInput) return "";
+    const partes = fechaInput.split("-");
+    const dia = parseInt(partes[2], 10);
+    const mes = parseInt(partes[1], 10);
+    const anio = partes[0];
+    return `${dia}/${mes}/${anio}`;
+}
 
 function obtenerFechaHoy() {
     const hoy = new Date();
@@ -71,7 +81,7 @@ window.actualizarFila = function(idFila) {
     const resultado = baseDeDatosChoferes[unidadId];
 
     const cellPresencia = document.getElementById(`cell-presencia-${idFila}`);
-    
+
     if (resultado) {
         document.getElementById(`cell-modelo-${idFila}`).innerText = resultado.modelo;
         document.getElementById(`cell-tamaño-${idFila}`).innerText = resultado.tamaño;
@@ -79,18 +89,61 @@ window.actualizarFila = function(idFila) {
         cellPresencia.innerText = (horario === "No se presenta") ? "0" : "1";
     } else {
         ["modelo", "tamaño", "chofer"].forEach(id => {
-            const el = document.getElementById(`cell-${id}-${idFila}`);
-            if(el) el.innerText = "---";
+            if(document.getElementById(`cell-${id}-${idFila}`)) document.getElementById(`cell-${id}-${idFila}`).innerText = "---";
         });
         cellPresencia.innerText = "0";
     }
-    calcularTotales();
+    calcularTotalesCarga();
 };
 
-function calcularTotales() {
+function calcularTotalesCarga() {
     let totalUnidades = 0;
     document.querySelectorAll(".presencia-dato").forEach(celda => totalUnidades += parseInt(celda.innerText));
     if(document.getElementById("contador-unidades")) document.getElementById("contador-unidades").innerText = totalUnidades;
+}
+
+// --- LÓGICA DE HISTORIAL (FILTRADO EXACTO) ---
+window.filtrarHistorial = function() {
+    const fFechaRaw = document.getElementById("filtro-fecha").value;
+    const fUnidad = document.getElementById("filtro-unidad").value.trim();
+    
+    const fFechaFormateada = formatearFechaParaFiltro(fFechaRaw);
+
+    const resultados = datosGlobales.filter(reg => {
+        const coincideUnidad = fUnidad === "" || String(reg.unidad) === fUnidad;
+        const coincideFecha = fFechaFormateada === "" || String(reg.fecha) === fFechaFormateada;
+        
+        return coincideUnidad && coincideFecha;
+    });
+
+    renderizarTablaHistorial(resultados);
+};
+
+window.limpiarFiltrosBusqueda = function() {
+    if(document.getElementById("filtro-fecha")) document.getElementById("filtro-fecha").value = "";
+    if(document.getElementById("filtro-unidad")) document.getElementById("filtro-unidad").value = "";
+    renderizarTablaHistorial(datosGlobales);
+};
+
+function renderizarTablaHistorial(lista) {
+    const tbody = document.getElementById("tabla-historial-body");
+    const kpiTotal = document.getElementById("total-registros");
+    if (!tbody) return;
+
+    if (kpiTotal) kpiTotal.innerText = lista.length;
+
+    tbody.innerHTML = lista.map(reg => `
+        <tr>
+            <td>${reg.fecha}</td>
+            <td>${reg.horario}</td>
+            <td>${reg.unidad}</td>
+            <td>${reg.chofer}</td>
+            <td>${reg.vueltas}</td>
+            <td>${reg.extra}</td>
+            <td>${reg.obs}</td>
+            <td><button onclick="abrirModalEditar('${reg.idFirebase}')" style="border:none; background:none; cursor:pointer;">✏️</button></td>
+        </tr>
+    `).join('');
 }
 
 // --- DASHBOARD: KPIs Y GRÁFICO ---
@@ -104,8 +157,7 @@ function actualizarDashboard(datos) {
     document.getElementById('kpi-unidades').innerText = totalUnidades;
     document.getElementById('kpi-productividad').innerText = totalUnidades > 0 ? (totalVueltas / totalUnidades).toFixed(2) : "0.00";
     document.getElementById('kpi-extras').innerText = totalUnidades > 0 ? ((totalExtras / totalUnidades) * 100).toFixed(0) + "%" : "0%";
-
-    // Agrupar por fecha para el gráfico
+    
     const statsPorDia = {};
     datos.forEach(reg => {
         if (!statsPorDia[reg.fecha]) statsPorDia[reg.fecha] = { vueltas: 0, unidades: 0 };
@@ -124,7 +176,7 @@ function renderizarGrafico(fechas, vueltas, unidades) {
     const canvas = document.getElementById('graficoVueltas');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    
+
     if (chartInstance) chartInstance.destroy();
 
     chartInstance = new Chart(ctx, {
@@ -132,37 +184,22 @@ function renderizarGrafico(fechas, vueltas, unidades) {
         data: {
             labels: fechas,
             datasets: [
-                {
-                    label: 'Vueltas Totales',
-                    data: vueltas,
-                    borderColor: '#2d7a44',
-                    backgroundColor: 'rgba(45, 122, 68, 0.1)',
-                    yAxisID: 'y',
-                    tension: 0.3,
-                    fill: true
-                },
-                {
-                    label: 'Unidades Presentes',
-                    data: unidades,
-                    borderColor: '#007bff',
-                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
-                    yAxisID: 'y1',
-                    tension: 0.3
-                }
+                { label: 'Vueltas Totales', data: vueltas, borderColor: '#2d7a44', backgroundColor: 'rgba(45, 122, 68, 0.1)', yAxisID: 'y', tension: 0.3, fill: true },
+                { label: 'Unidades Presentes', data: unidades, borderColor: '#007bff', backgroundColor: 'rgba(0, 123, 255, 0.1)', yAxisID: 'y1', tension: 0.3 }
             ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             scales: {
-                y: { type: 'linear', position: 'left', title: { display: true, text: 'Vueltas' } },
-                y1: { type: 'linear', position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Unidades' } }
+                y: { type: 'linear', position: 'left', title: { display: true, text: 'Vueltas' }, beginAtZero: true },
+                y1: { type: 'linear', position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Unidades' }, beginAtZero: true }
             }
         }
     });
 }
 
-// --- FIREBASE: CARGA DE DATOS ---
+// --- FIREBASE: CARGA INICIAL ---
 async function obtenerDatos() {
     const { collection, getDocs, query, orderBy } = window.firestoreLib;
     const q = query(collection(window.db, "historialLogistica"), orderBy("fecha", "asc"));
@@ -170,41 +207,21 @@ async function obtenerDatos() {
     try {
         const querySnapshot = await getDocs(q);
         datosGlobales = [];
-        querySnapshot.forEach(doc => datosGlobales.push({ idFirebase: doc.id, ...doc.data() }));
+        querySnapshot.forEach(doc => {
+            datosGlobales.push({ idFirebase: doc.id, ...doc.data() });
+        });
         
-        // Si estamos en dashboard, actualizamos KPIs y gráfico
+        // Ejecutar según la página actual
         actualizarDashboard(datosGlobales);
-        
-        // Si estamos en historial, renderizamos la tabla
-        if (document.getElementById("tabla-historial-body")) {
-            renderizarTablaHistorial(datosGlobales);
-        }
+        renderizarTablaHistorial(datosGlobales);
     } catch (e) {
-        console.error("Error Firebase:", e);
+        console.error("Error al obtener datos:", e);
     }
 }
 
-function renderizarTablaHistorial(lista) {
-    const tbody = document.getElementById("tabla-historial-body");
-
-    if (!tbody) return;
-    tbody.innerHTML = lista.map(reg => `
-        <tr>
-            <td>${reg.fecha}</td>
-            <td>${reg.horario}</td>
-            <td>${reg.unidad}</td>
-            <td>${reg.chofer}</td>
-            <td>${reg.vueltas}</td>
-            <td>${reg.extra}</td>
-            <td>${reg.obs}</td>
-            <td><button onclick="abrirModalEditar('${reg.idFirebase}')">✏️</button></td>
-        </tr>
-    `).join('');
-}
-
-// --- EVENTOS INICIALES ---
+// --- EVENTOS AL CARGAR LA PÁGINA ---
 window.onload = function() {
-    // 1. Detectar si hay que cargar datos de Firebase (Dashboard o Historial)
+    
     if (document.getElementById('graficoVueltas') || document.getElementById('tabla-historial-body')) {
         let intentos = 0;
         const checkDB = setInterval(() => {
@@ -218,18 +235,17 @@ window.onload = function() {
         }, 100);
     }
 
-    // 2. Si es panel de carga, agregar primera fila
+    // Si estamos en la página de carga diaria
     if (document.getElementById("tabla-body")) {
         agregarFila();
     }
 
-    // 3. Botones de filtro del Dashboard
+    // Filtros del Dashboard (Indicadores)
     if (document.getElementById('btn-aplicar-filtro')) {
         document.getElementById('btn-aplicar-filtro').onclick = () => {
             const f = document.getElementById('filtro-fecha-dashboard').value;
             if (!f) return;
-            const [y, m, d] = f.split('-');
-            const fechaBusqueda = `${parseInt(d)}/${parseInt(m)}/${y}`;
+            const fechaBusqueda = formatearFechaParaFiltro(f);
             const filtrados = datosGlobales.filter(reg => reg.fecha === fechaBusqueda);
             actualizarDashboard(filtrados);
         };
@@ -238,4 +254,13 @@ window.onload = function() {
             actualizarDashboard(datosGlobales);
         };
     }
+};
+
+// --- EXPORTACIÓN Y OTROS ---
+window.exportarHistorialExcel = function() {
+    if (datosGlobales.length === 0) return alert("No hay datos para exportar.");
+    const hoja = XLSX.utils.json_to_sheet(datosGlobales);
+    const libro = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(libro, hoja, "Historial");
+    XLSX.writeFile(libro, "Historial_Logistica.xlsx");
 };
