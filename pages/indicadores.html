@@ -12,23 +12,23 @@
     <h1>DASHBOARD DE RENDIMIENTO</h1>
 
     <div class="resumen-container">
-        <div class="kpi-card" style="border-left: 5px solid #28a745;">
+        <div class="kpi-card border-green">
             <span class="kpi-label">PRODUCTIVIDAD x UNIDAD</span>
             <span id="kpi-productividad" class="kpi-value">0.00</span>
         </div>
         
-        <div class="kpi-card" style="border-left: 5px solid #ffc107;">
+        <div class="kpi-card border-yellow">
             <span class="kpi-label">RATIO DE EXTRAS</span>
             <span id="kpi-extras" class="kpi-value">0%</span>
         </div>
 
         <div class="acciones-botones">
-            <a href="../index.html" class="btn-historial" style="text-decoration: none;">VOLVER AL PANEL</a>
+            <a href="../index.html" class="btn-historial">VOLVER AL PANEL</a>
             <button class="btn-excel" onclick="window.location.reload()">ACTUALIZAR</button>
         </div>
     </div>
 
-    <div class="resumen-container" style="background: white; padding: 20px; border-radius: 8px; margin-top: 20px;">
+    <div class="resumen-container dashboard-grafico">
         <canvas id="graficoVueltas" width="400" height="150"></canvas>
     </div>
 
@@ -48,8 +48,7 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-
-        // Función para procesar datos y mostrar KPIs
+        
         async function generarIndicadores() {
             const q = query(collection(db, "historialLogistica"), orderBy("createdAt", "asc"));
             const querySnapshot = await getDocs(q);
@@ -57,20 +56,17 @@
             querySnapshot.forEach(doc => datos.push(doc.data()));
 
             if (datos.length === 0) return;
-
-            // 1. Cálculos de KPIs
+        
             const totalVueltas = datos.reduce((sum, reg) => sum + Number(reg.vueltas), 0);
             const totalUnidades = datos.length;
             const totalExtras = datos.filter(reg => Number(reg.extra) > 0).length;
 
             const productividad = (totalVueltas / totalUnidades).toFixed(2);
             const ratioExtras = ((totalExtras / totalUnidades) * 100).toFixed(0) + "%";
-
-            // Mostrar en pantalla
+            
             document.getElementById('kpi-productividad').innerText = productividad;
             document.getElementById('kpi-extras').innerText = ratioExtras;
-
-            // 2. Preparar datos para el gráfico (Vueltas por Fecha)
+            
             const historialPorFecha = {};
             datos.forEach(reg => {
                 historialPorFecha[reg.fecha] = (historialPorFecha[reg.fecha] || 0) + Number(reg.vueltas);
@@ -91,8 +87,8 @@
                     datasets: [{
                         label: 'Suma de Vueltas por Día',
                         data: vueltas,
-                        borderColor: '#218838',
-                        backgroundColor: 'rgba(33, 136, 56, 0.1)',
+                        borderColor: '#2d7a44',
+                        backgroundColor: 'rgba(45, 122, 68, 0.1)',
                         borderWidth: 3,
                         fill: true,
                         tension: 0.3
@@ -100,6 +96,7 @@
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     scales: { y: { beginAtZero: true } }
                 }
             });
