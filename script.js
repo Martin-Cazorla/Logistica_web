@@ -151,7 +151,7 @@ function actualizarDashboard(datos) {
     if (!document.getElementById('kpi-unidades')) return;
 
     const totalUnidades = datos.length;
-    const totalVueltas = datos.reduce((sum, reg) => sum + Number(reg.vueltas), 0);
+    const totalVueltas = datos.reduce((sum, reg) => sum + Number(reg.vueltas || 0), 0);
     const totalExtras = datos.filter(reg => Number(reg.extra) > 0).length;
 
     document.getElementById('kpi-unidades').innerText = totalUnidades;
@@ -161,7 +161,7 @@ function actualizarDashboard(datos) {
     const statsPorDia = {};
     datos.forEach(reg => {
         if (!statsPorDia[reg.fecha]) statsPorDia[reg.fecha] = { vueltas: 0, unidades: 0 };
-        statsPorDia[reg.fecha].vueltas += Number(reg.vueltas);
+        statsPorDia[reg.fecha].vueltas += Number(reg.vueltas || 0);
         statsPorDia[reg.fecha].unidades += 1;
     });
 
@@ -246,7 +246,8 @@ window.onload = function() {
             const f = document.getElementById('filtro-fecha-dashboard').value;
             if (!f) return;
             const fechaBusqueda = formatearFechaParaFiltro(f);
-            const filtrados = datosGlobales.filter(reg => reg.fecha === fechaBusqueda);
+            // FILTRO EXACTO PARA DASHBOARD
+            const filtrados = datosGlobales.filter(reg => String(reg.fecha) === String(fechaBusqueda));
             actualizarDashboard(filtrados);
         };
         document.getElementById('btn-quitar-filtro').onclick = () => {
