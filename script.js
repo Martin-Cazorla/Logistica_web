@@ -35,16 +35,7 @@ let contadorFilas = 0;
 let datosGlobales = []; 
 let chartInstance = null;
 
-// Ayudante para formatear fechas de input (YYYY-MM-DD) a formato DB (D/M/YYYY)
-function formatearFechaParaFiltro(fechaInput) {
-    if (!fechaInput) return "";
-    const partes = fechaInput.split("-");
-    const dia = parseInt(partes[2], 10);
-    const mes = parseInt(partes[1], 10);
-    const anio = partes[0];
-    return `${dia}/${mes}/${anio}`;
-}
-
+// Ayudante para formatear fechas
 function obtenerFechaHoy() {
     const hoy = new Date();
     return hoy.toLocaleDateString('es-AR');
@@ -76,10 +67,8 @@ function agregarFila() {
 
 window.actualizarFila = function(idFila) {
     const unidadId = document.getElementById(`input-unidad-${idFila}`).value;
-    const horario = document.getElementById(`select-horario-${idFila}`).value;
-
-    const resultado = baseDeDatosChoferes[unidadId];
-
+    const horario = document.getElementById(`select-horario-${idFila}`).value;     
+    const resultado = baseDeDatosChoferes[unidadId];     
     const cellPresencia = document.getElementById(`cell-presencia-${idFila}`);
 
     if (resultado) {
@@ -102,16 +91,24 @@ function calcularTotalesCarga() {
     if(document.getElementById("contador-unidades")) document.getElementById("contador-unidades").innerText = totalUnidades;
 }
 
-// --- LÓGICA DE HISTORIAL (FILTRADO EXACTO) ---
+// --- HISTORIAL (Búsqueda en tiempo real) ---
 window.filtrarHistorial = function() {
     const fFechaRaw = document.getElementById("filtro-fecha").value;
     const fUnidad = document.getElementById("filtro-unidad").value.trim();
     
-    const fFechaFormateada = formatearFechaParaFiltro(fFechaRaw);
+    let fechaConCero = "";
+    let fechaSinCero = "";
+    
+    if (fFechaRaw) {
+        const partes = fFechaRaw.split("-");
+        fechaConCero = `${partes[2]}/${partes[1]}/${partes[0]}`; 
+        fechaSinCero = `${parseInt(partes[2])}/${parseInt(partes[1])}/${partes[0]}`;
+    }
 
     const resultados = datosGlobales.filter(reg => {
-        const coincideUnidad = fUnidad === "" || String(reg.unidad) === fUnidad;
-        const coincideFecha = fFechaFormateada === "" || String(reg.fecha) === fFechaFormateada;
+        const valorFecha = String(reg.fecha || reg.Fecha || "").trim();
+        const coincideUnidad = fUnidad === "" || String(reg.unidad).includes(fUnidad);
+        const coincideFecha = fFechaRaw === "" || (valorFecha === fechaConCero || valorFecha === fechaSinCero);
         
         return coincideUnidad && coincideFecha;
     });
@@ -128,8 +125,7 @@ window.limpiarFiltrosBusqueda = function() {
 function renderizarTablaHistorial(lista) {
     const tbody = document.getElementById("tabla-historial-body");
     const kpiTotal = document.getElementById("total-registros");
-    if (!tbody) return;
-
+    if (!tbody) return;  
     if (kpiTotal) kpiTotal.innerText = lista.length;
 
     tbody.innerHTML = lista.map(reg => `
@@ -146,7 +142,7 @@ function renderizarTablaHistorial(lista) {
     `).join('');
 }
 
-// --- DASHBOARD: KPIs Y GRÁFICO ---
+// --- DASHBOARD ---
 function actualizarDashboard(datos) {
     if (!document.getElementById('kpi-unidades')) return;
 
@@ -160,9 +156,10 @@ function actualizarDashboard(datos) {
     
     const statsPorDia = {};
     datos.forEach(reg => {
-        if (!statsPorDia[reg.fecha]) statsPorDia[reg.fecha] = { vueltas: 0, unidades: 0 };
-        statsPorDia[reg.fecha].vueltas += Number(reg.vueltas || 0);
-        statsPorDia[reg.fecha].unidades += 1;
+        const f = reg.fecha || reg.Fecha;
+        if (!statsPorDia[f]) statsPorDia[f] = { vueltas: 0, unidades: 0 };
+        statsPorDia[f].vueltas += Number(reg.vueltas || 0);
+        statsPorDia[f].unidades += 1;
     });
 
     const fechas = Object.keys(statsPorDia);
@@ -175,8 +172,7 @@ function actualizarDashboard(datos) {
 function renderizarGrafico(fechas, vueltas, unidades) {
     const canvas = document.getElementById('graficoVueltas');
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-
+    const ctx = canvas.getContext('2d');   
     if (chartInstance) chartInstance.destroy();
 
     chartInstance = new Chart(ctx, {
@@ -199,7 +195,7 @@ function renderizarGrafico(fechas, vueltas, unidades) {
     });
 }
 
-// --- FIREBASE: CARGA INICIAL ---
+// --- FIREBASE: CARGA ---
 async function obtenerDatos() {
     const { collection, getDocs, query, orderBy } = window.firestoreLib;
     const q = query(collection(window.db, "historialLogistica"), orderBy("fecha", "asc"));
@@ -211,18 +207,15 @@ async function obtenerDatos() {
             datosGlobales.push({ idFirebase: doc.id, ...doc.data() });
         });
         
-        // Ejecutar según la página actual
+        console.log("¡Firebase respondió! Registros cargados:", datosGlobales.length);
         actualizarDashboard(datosGlobales);
         renderizarTablaHistorial(datosGlobales);
     } catch (e) {
         console.error("Error al obtener datos:", e);
     }
-} 
+}    
 
-// --- BLOQUE DE window.onload ---
-
-window.onload = function() {
-     
+window.onload = function() {  
     if (document.getElementById('graficoVueltas') || document.getElementById('tabla-historial-body')) {
         let intentos = 0;
         const checkDB = setInterval(() => {
@@ -235,37 +228,29 @@ window.onload = function() {
             if (++intentos > 50) clearInterval(checkDB);
         }, 100);
     }
- 
+
     if (document.getElementById("tabla-body")) {
         agregarFila();
     }
-
-
+    
     const btnFiltrar = document.getElementById('btn-aplicar-filtro');
     const btnVerTodo = document.getElementById('btn-quitar-filtro');
 
     if (btnFiltrar) {
         btnFiltrar.onclick = () => {
             const f = document.getElementById('filtro-fecha-dashboard').value;
-            if (!f) {
-                alert("Selecciona una fecha");
-                return;
-            }
-             
-            const partes = f.split("-");  
-            const fechaConCero = `${partes[2]}/${partes[1]}/${partes[0]}`;
-            const fechaSinCero = `${parseInt(partes[2])}/${parseInt(partes[1])}/${partes[0]}`;
+            if (!f) return alert("Selecciona una fecha");
             
-            console.log("Buscando coincidencias para:", fechaConCero, "o", fechaSinCero); 
+            const partes = f.split("-");
+            const fechaConCero = `${partes[2]}/${partes[1]}/${partes[0]}`; 
+            const fechaSinCero = `${parseInt(partes[2])}/${parseInt(partes[1])}/${partes[0]}`;
+              
             const filtrados = datosGlobales.filter(reg => {
-                const fechaRegistro = String(reg.fecha).trim();
-                return fechaRegistro === fechaConCero || fechaRegistro === fechaSinCero;
+                const valorFecha = String(reg.fecha || reg.Fecha || "").trim();
+                return valorFecha === fechaConCero || valorFecha === fechaSinCero;
             });
             
-            if (filtrados.length === 0) {
-                alert("No hay datos para esa fecha. Verifica que existan registros en el historial para el día seleccionado.");
-            }
-
+            if (filtrados.length === 0) alert("No se encontraron datos.");
             actualizarDashboard(filtrados);
         };
     }
@@ -277,8 +262,7 @@ window.onload = function() {
         };
     }
 };
-
-// --- EXPORTACIÓN Y OTROS ---
+  
 window.exportarHistorialExcel = function() {
     if (datosGlobales.length === 0) return alert("No hay datos para exportar.");
     const hoja = XLSX.utils.json_to_sheet(datosGlobales);
