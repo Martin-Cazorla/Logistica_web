@@ -169,11 +169,11 @@ h1 {
     }
 }
 
-// Ventana Modal de Edición - Centrado y Ajuste de Pantalla
+// Ventana Modal de Edición
 .modal {
     display: none; 
     position: fixed; 
-    z-index: 2000; // Aumentamos el z-index por seguridad
+    z-index: 2000; 
     left: 0; 
     top: 0; 
     width: 100%; 
@@ -181,23 +181,19 @@ h1 {
     background-color: rgba(0,0,0,0.6);
     backdrop-filter: blur(3px);
     
-    // ESTO ES LO CLAVE: Centrado absoluto en el medio de la pantalla
-    display: flex;
+    // Centrado
     justify-content: center;
     align-items: center; 
-    padding: 20px; // Espacio de seguridad para que no toque los bordes
+    padding: 20px;
 
     &-content {
         background-color: white;
-        margin: auto; // Refuerza el centrado
+        margin: auto; 
         padding: 0;
         border-radius: 8px;
         width: 100%;
         max-width: 400px;
-        
-        // LIMITAMOS LA ALTURA: para que no baje de la barra de Windows
-        max-height: 80vh; 
-        
+        max-height: 85vh; 
         box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         overflow: hidden;
         display: flex;
@@ -208,47 +204,60 @@ h1 {
     &-header {
         background-color: $verde-logistica;
         color: white;
-        padding: 12px 20px;
-        flex-shrink: 0; // El encabezado no se achica
-        h3 { margin: 0; font-size: 1.1rem; }
+        padding: 15px 20px;
+        flex-shrink: 0;
+        h3 { margin: 0; font-size: 1.2rem; text-align: center; }
     }
 
     &-body {
         padding: 20px;
-        overflow-y: auto; // Si hay mucho contenido, sale el scroll AQUÍ
-        flex-grow: 1;    // Toma el espacio disponible
+        overflow-y: auto; 
+        flex-grow: 1;
         
         .form-group {
-            margin-bottom: 12px;
-            label { display: block; margin-bottom: 4px; font-weight: bold; font-size: 0.9rem; text-align: left; }
+            margin-bottom: 15px;
+            label { 
+                display: block; 
+                margin-bottom: 6px; 
+                font-weight: bold; 
+                font-size: 0.9rem; 
+                color: $gray-dark;
+            }
             input, select { 
                 width: 100%; 
-                padding: 8px; 
+                padding: 10px; 
                 border: 1px solid #ccc; 
                 border-radius: 4px; 
                 box-sizing: border-box; 
+                font-size: 1rem;
+                &:focus {
+                    border-color: $verde-logistica;
+                    outline: none;
+                    box-shadow: 0 0 5px rgba($verde-logistica, 0.3);
+                }
             }
         }
     }
 
     &-footer {
-        padding: 12px 20px;
+        padding: 15px 20px;
         background-color: #f8f9fa;
-        text-align: right;
+
         display: flex;
         justify-content: flex-end;
-        gap: 10px;
+        gap: 12px;
         border-top: 1px solid #dee2e6;
-        flex-shrink: 0; // El pie de página SIEMPRE se queda visible abajo
+        flex-shrink: 0;
 
         .btn-guardar {
             background-color: $verde-logistica;
             color: white;
             border: none;
-            padding: 8px 16px;
+            padding: 10px 20px;
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
+            transition: background 0.2s;
             &:hover { background-color: $verde-hover; }
         }
 
@@ -256,16 +265,17 @@ h1 {
             background-color: #6c757d;
             color: white;
             border: none;
-            padding: 8px 16px;
+            padding: 10px 20px;
             border-radius: 4px;
             cursor: pointer;
+            transition: background 0.2s;
             &:hover { background-color: #5a6268; }
         }
     }
 }
 
-// Ajuste de la animación para que salga desde el centro
+
 @keyframes animarsuperior {
-    from { transform: scale(0.8); opacity: 0; }
+    from { transform: scale(0.85); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
 }
