@@ -219,15 +219,19 @@ async function obtenerDatos() {
     }
 }
 
-// --- EVENTOS AL CARGAR LA PÁGINA ---
+// --- COPIA ESTE BLOQUE DE window.onload QUE ESTÁ LIMPIO ---
+
+// --- BLOQUE ACTUALIZADO DE window.onload ---
+
 window.onload = function() {
     
+    // 1. Cargar datos si hay elementos que los necesiten
     if (document.getElementById('graficoVueltas') || document.getElementById('tabla-historial-body')) {
         let intentos = 0;
         const checkDB = setInterval(() => {
 
             if (window.db && window.firestoreLib) {
-
+                
                 clearInterval(checkDB);
                 obtenerDatos();
             }
@@ -235,22 +239,52 @@ window.onload = function() {
         }, 100);
     }
 
-    // Si estamos en la página de carga diaria
+    // 2. Si estamos en la página de carga diaria
     if (document.getElementById("tabla-body")) {
         agregarFila();
     }
 
-    // Filtros del Dashboard (Indicadores)
-    if (document.getElementById('btn-aplicar-filtro')) {
-        document.getElementById('btn-aplicar-filtro').onclick = () => {
+    // 3. EVENTOS DE FILTRADO PARA EL DASHBOARD (Versión con normalización de fechas)
+    const btnFiltrar = document.getElementById('btn-aplicar-filtro');
+    const btnVerTodo = document.getElementById('btn-quitar-filtro');
+
+    if (btnFiltrar) {
+        btnFiltrar.onclick = () => {
             const f = document.getElementById('filtro-fecha-dashboard').value;
-            if (!f) return;
-            const fechaBusqueda = formatearFechaParaFiltro(f);
-            // FILTRO EXACTO PARA DASHBOARD
-            const filtrados = datosGlobales.filter(reg => String(reg.fecha) === String(fechaBusqueda));
+            if (!f) {
+                alert("Selecciona una fecha");
+                return;
+            }
+            
+            // Obtenemos las partes de la fecha del calendario (YYYY-MM-DD)
+            const partes = f.split("-");
+            
+            // Creamos las dos variantes posibles para comparar contra la base de datos
+            // Variante 1: 13/01/2026 (Mantiene el cero del mes si lo tiene)
+            const fechaConCero = `${partes[2]}/${partes[1]}/${partes[0]}`; 
+            
+            // Variante 2: 13/1/2026 (Elimina ceros a la izquierda usando parseInt)
+            const fechaSinCero = `${parseInt(partes[2])}/${parseInt(partes[1])}/${partes[0]}`;
+            
+            console.log("Buscando coincidencias para:", fechaConCero, "o", fechaSinCero);
+
+            // Filtramos comparando contra AMBAS posibilidades
+            const filtrados = datosGlobales.filter(reg => {
+                const fechaRegistro = String(reg.fecha).trim();
+                return fechaRegistro === fechaConCero || fechaRegistro === fechaSinCero;
+            });
+            
+            if (filtrados.length === 0) {
+                alert("No hay datos para esa fecha. Verifica que existan registros en el historial para el día seleccionado.");
+            }
+            
+            // Actualizamos los KPIs y el gráfico con lo que encontramos
             actualizarDashboard(filtrados);
         };
-        document.getElementById('btn-quitar-filtro').onclick = () => {
+    }
+
+    if (btnVerTodo) {
+        btnVerTodo.onclick = () => {
             document.getElementById('filtro-fecha-dashboard').value = "";
             actualizarDashboard(datosGlobales);
         };
