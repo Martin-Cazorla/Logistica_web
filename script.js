@@ -210,13 +210,40 @@ function renderizarTabla(lista) {
     });
 }
 
+// --- NUEVA LÓGICA DE FILTRADO EXACTO ---
 function filtrarHistorial() {
-    const fFecha = document.getElementById("filtro-fecha").value.toLowerCase().trim();
-    const fUnid = document.getElementById("filtro-unidad").value.toLowerCase().trim();
-    const resultados = datosHistorialCompleto.filter(reg => 
-        String(reg.fecha).toLowerCase().includes(fFecha) && String(reg.unidad).toLowerCase().includes(fUnid)
-    );
+    let fFechaOriginal = document.getElementById("filtro-fecha").value; 
+    const fUnid = document.getElementById("filtro-unidad").value.trim();
+    
+    let fFechaFormateada = "";
+
+    // Convertimos la fecha del input al formato DD/MM/YYYY de la base de datos
+    if (fFechaOriginal) {
+        const partes = fFechaOriginal.split("-");
+        const dia = parseInt(partes[2], 10);
+        const mes = parseInt(partes[1], 10);
+        const anio = partes[0];
+        fFechaFormateada = `${dia}/${mes}/${anio}`;
+    }
+
+    const resultados = datosHistorialCompleto.filter(reg => {
+        // Coincidencia exacta de fecha
+        const coincideFecha = fFechaFormateada === "" || String(reg.fecha) === fFechaFormateada;
+        
+        // Coincidencia exacta de unidad
+        const coincideUnidad = fUnid === "" || String(reg.unidad) === fUnid;
+
+        return coincideFecha && coincideUnidad;
+    });
+
     renderizarTabla(resultados);
+}
+
+// Función para limpiar filtros y ver todo de nuevo
+function limpiarFiltrosBusqueda() {
+    document.getElementById("filtro-fecha").value = "";
+    document.getElementById("filtro-unidad").value = "";
+    renderizarTabla(datosHistorialCompleto);
 }
 
 function abrirModalEditar(index) {

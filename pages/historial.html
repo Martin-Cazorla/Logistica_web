@@ -10,13 +10,13 @@
 </head>
 <body>
 
-    <h1>Historial de Cargas Archivadas</h1>
+    <h1>HISTORIAL DE CARGAS ARCHIVADAS</h1>
 
     <div class="resumen-container">
         <div class="filtros-container">
             <div class="filtro-grupo">
                 <label>Buscar por Fecha:</label>
-                <input type="text" id="filtro-fecha" placeholder="DD/MM/YYYY" oninput="filtrarHistorial()">
+                <input type="date" id="filtro-fecha" oninput="filtrarHistorial()">
             </div>
             <div class="filtro-grupo">
                 <label>Buscar por Unidad:</label>
@@ -31,6 +31,7 @@
 
         <div class="acciones-botones">
             <a href="../index.html" class="btn-historial" style="text-decoration: none;">VOLVER AL PANEL</a>
+            <button class="btn-excel" onclick="limpiarFiltrosBusqueda()" style="background-color: #6c757d;">LIMPIAR FILTROS</button>
             <button class="btn-excel" onclick="exportarHistorialExcel()">DESCARGAR EXCEL</button>
             <button class="btn-limpiar" onclick="borrarTodoElHistorial()">BORRAR TODO</button>
         </div>
@@ -39,14 +40,14 @@
     <table class="tabla-logistica">
         <thead>
             <tr>
-                <th>Fecha</th>
-                <th>Horario</th>
-                <th>Unidad</th>
-                <th>Chofer</th>
-                <th>Vueltas</th>
-                <th>Extra</th>
-                <th>Observaciones</th>
-                <th>Acciones</th>
+                <th>FECHA</th>
+                <th>HORARIO</th>
+                <th>UNIDAD</th>
+                <th>CHOFER</th>
+                <th>VUELTAS</th>
+                <th>EXTRA</th>
+                <th>OBSERVACIONES</th>
+                <th>ACCIONES</th>
             </tr>
         </thead>
         <tbody id="tabla-historial-body"></tbody>
@@ -95,8 +96,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-        <script type="module">
-
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, query, orderBy, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -112,20 +112,14 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-            window.db = db;
-            window.firestoreLib = { collection, addDoc, getDocs, query, orderBy, doc, updateDoc, deleteDoc };
+        window.db = db;
+        window.firestoreLib = { collection, addDoc, getDocs, query, orderBy, doc, updateDoc, deleteDoc };
         
         if (typeof cargarHistorialDesdeFirebase === "function") {
             cargarHistorialDesdeFirebase();
-        } else {
-            const retryLoad = setInterval(() => {
-                if (typeof cargarHistorialDesdeFirebase === "function") {
-                    cargarHistorialDesdeFirebase();
-                    clearInterval(retryLoad);
-                }
-            }, 500);
         }
-        </script>
+        
+    </script>
     <script src="../script.js"></script>
 </body>
 </html>
