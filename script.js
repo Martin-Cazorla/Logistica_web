@@ -298,10 +298,18 @@ window.onload = function() {
     const esHistorial = document.getElementById("tabla-historial-body");
     
     if (esHistorial) {
+        console.log("Detectada página de historial, esperando a Firebase...");
+        let intentos = 0;
         const checkDB = setInterval(() => {
-            if (window.db) {
+            intentos++;
+            if (window.db && window.firestoreLib) {
+                console.log("Firebase conectado, cargando datos...");
                 clearInterval(checkDB);
                 cargarHistorialDesdeFirebase();
+            }
+            if (intentos > 50) { 
+                clearInterval(checkDB);
+                console.error("No se pudo conectar con Firebase.");
             }
         }, 100); 
     } else {
