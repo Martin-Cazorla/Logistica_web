@@ -210,9 +210,9 @@ function renderizarTabla(lista) {
     });
 }
 
-// --- NUEVA LÓGICA DE FILTRADO EXACTO ---
+// --- LÓGICA DE FILTRADO 
 function filtrarHistorial() {
-    let fFechaOriginal = document.getElementById("filtro-fecha").value; 
+    const fFechaOriginal = document.getElementById("filtro-fecha").value; // Formato YYYY-MM-DD
     const fUnid = document.getElementById("filtro-unidad").value.trim();
     
     let fFechaFormateada = "";
@@ -220,17 +220,19 @@ function filtrarHistorial() {
     // Convertimos la fecha del input al formato DD/MM/YYYY de la base de datos
     if (fFechaOriginal) {
         const partes = fFechaOriginal.split("-");
-        const dia = parseInt(partes[2], 10);
-        const mes = parseInt(partes[1], 10);
+        // Convertimos a número y luego a string para eliminar ceros iniciales (ej: 02 -> 2)
+        const dia = parseInt(partes[2], 10).toString();
+        const mes = parseInt(partes[1], 10).toString();
         const anio = partes[0];
         fFechaFormateada = `${dia}/${mes}/${anio}`;
     }
 
     const resultados = datosHistorialCompleto.filter(reg => {
-        // Coincidencia exacta de fecha
+        // 1. Filtrado de Fecha: Si hay fecha seleccionada, debe ser EXACTA
         const coincideFecha = fFechaFormateada === "" || String(reg.fecha) === fFechaFormateada;
         
-        // Coincidencia exacta de unidad
+        // 2. Filtrado de Unidad: Para evitar que "101" traiga "1017", 
+        // usamos una comparación que verifique si el número es exactamente el mismo.
         const coincideUnidad = fUnid === "" || String(reg.unidad) === fUnid;
 
         return coincideFecha && coincideUnidad;
