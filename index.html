@@ -50,7 +50,34 @@
         </tbody>
     </table>
 
+    <script type="module">
+        // herramientas básicas y la base de datos (Firestore)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // configuración
+    const firebaseConfig = {
+        apiKey: "AIzaSyBa1n9yQJ33viJ_3P-99yuL4-fzQFzLPis",
+        authDomain: "logistica-envios-44bf6.firebaseapp.com",
+        projectId: "logistica-envios-44bf6",
+        storageBucket: "logistica-envios-44bf6.firebasestorage.app",
+        messagingSenderId: "611013572218",
+        appId: "1:611013572218:web:beb687be674a65ceafadc3",
+        measurementId: "G-V14SKXYCJ5"
+        };
+
+    // Inicializam la conexión
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // base de datos archivo script.js
+        window.db = db;
+        window.firestoreLib = { collection, addDoc, getDocs, query, orderBy };
+  
+        console.log("¡Conexión a la logística de Firebase lista!");
+    </script>
+
     <script src="script.js"></script>
-    
+
 </body>
 </html>

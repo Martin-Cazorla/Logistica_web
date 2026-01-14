@@ -1,4 +1,4 @@
-// 1. Base de Datos Completa de Choferes
+// 1. Base de Datos Completa de Choferes (Se mantiene igual)
 const baseDeDatosChoferes = {
     "99": { modelo: "Renault Master 2,5 DCL", tamaño: "Grande", chofer: "Carlos Vitale" },
     "591": { modelo: "Citroen Jumper", tamaño: "Grande", chofer: "Emanuel Suarez" },
@@ -113,7 +113,7 @@ function revisarTecla(event, idFila) {
     }
 }
 
-// --- EXPORTAR Y LIMPIAR ---
+// --- EXPORTAR Y LIMPIAR (ACTUALIZADO CON FIREBASE) ---
 function exportarExcel() {
     const tablaOriginal = document.querySelector(".tabla-logistica");
     if (!tablaOriginal) return;
@@ -128,33 +128,64 @@ function exportarExcel() {
     XLSX.writeFile(libro, `Logistica_${obtenerFechaHoy().replace(/\//g, '-')}.xlsx`);
 }
 
-function limpiarDia() {
-    if (confirm("¿Deseas archivar los datos de hoy?")) {
-        let historialActual = JSON.parse(localStorage.getItem("historialLogistica")) || [];
+// Nueva función para guardar cada registro en Firebase
+async function guardarEnFirebase(registro) {
+    try {
+        await window.firestoreLib.addDoc(window.firestoreLib.collection(window.db, "historialLogistica"), registro);
+    } catch (e) {
+        console.error("Error al guardar en Firebase:", e);
+    }
+}
+
+async function limpiarDia() {
+    if (confirm("¿Deseas archivar los datos de hoy en la nube para todo el equipo?")) {
+        // Recorremos las filas para guardar en Firebase
         for (let i = 1; i <= contadorFilas; i++) {
             const unid = document.getElementById(`input-unidad-${i}`).value;
             if (unid !== "") {
-                historialActual.push({
+                const registro = {
                     fecha: obtenerFechaHoy(),
                     horario: document.getElementById(`select-horario-${i}`).value,
                     unidad: unid,
                     chofer: document.getElementById(`cell-chofer-${i}`).innerText,
                     vueltas: document.getElementById(`select-vueltas-${i}`).value,
                     extra: document.getElementById(`select-extra-${i}`).value,
-                    obs: document.getElementById(`input-obs-${i}`).value
-                });
+                    obs: document.getElementById(`input-obs-${i}`).value,
+                    createdAt: new Date() // Para ordenar cronológicamente
+                };
+                await guardarEnFirebase(registro);
             }
         }
-        localStorage.setItem("historialLogistica", JSON.stringify(historialActual));
+        
+        // Limpiamos la tabla visualmente
         document.getElementById("tabla-body").innerHTML = "";
         contadorFilas = 0;
         agregarFila();
         calcularTotales();
-        alert("¡Archivado correctamente!");
+        alert("¡Archivado y sincronizado en la nube correctamente!");
     }
 }
 
-// --- GESTIÓN DE HISTORIAL ---
+// --- GESTIÓN DE HISTORIAL (ACTUALIZADO CON FIREBASE) ---
+
+// Nueva función para traer los datos desde Firebase
+async function cargarHistorialDesdeFirebase() {
+    const { collection, getDocs, query, orderBy } = window.firestoreLib;
+    const q = query(collection(window.db, "historialLogistica"), orderBy("createdAt", "desc"));
+    
+    try {
+        const querySnapshot = await getDocs(q);
+        datosHistorialCompleto = [];
+        querySnapshot.forEach((doc) => {
+            // Guardamos el ID de Firebase para poder editar o borrar luego
+            datosHistorialCompleto.push({ idFirebase: doc.id, ...doc.data() });
+        });
+        renderizarTabla(datosHistorialCompleto);
+    } catch (e) {
+        console.error("Error al cargar historial:", e);
+    }
+}
+
 function renderizarTabla(lista) {
     const tbody = document.getElementById("tabla-historial-body");
     const contador = document.getElementById("total-registros");
@@ -162,11 +193,7 @@ function renderizarTabla(lista) {
     tbody.innerHTML = "";
     if (contador) contador.innerText = lista.length;
 
-    // Usamos reverse para ver lo más nuevo primero
-    [...lista].reverse().forEach((reg) => {
-        // BUSQUEDA CRÍTICA: Encontrar la posición real en el array principal
-        const indexReal = datosHistorialCompleto.indexOf(reg);
-
+    lista.forEach((reg, index) => {
         const fila = `<tr>
             <td>${reg.fecha}</td>
             <td>${reg.horario}</td>
@@ -176,7 +203,7 @@ function renderizarTabla(lista) {
             <td>${reg.extra}</td>
             <td>${reg.obs}</td>
             <td>
-                <button onclick="abrirModalEditar(${indexReal})" style="cursor:pointer; background:none; border:none; font-size:1.2rem;">✏️</button>
+                <button onclick="abrirModalEditar(${index})" style="cursor:pointer; background:none; border:none; font-size:1.2rem;">✏️</button>
             </td>
         </tr>`;
         tbody.innerHTML += fila;
@@ -192,11 +219,11 @@ function filtrarHistorial() {
     renderizarTabla(resultados);
 }
 
-function abrirModalEditar(indexReal) {
-    const reg = datosHistorialCompleto[indexReal];
+function abrirModalEditar(index) {
+    const reg = datosHistorialCompleto[index];
     if (!reg) return;
 
-    document.getElementById("edit-index").value = indexReal;
+    document.getElementById("edit-index").value = index;
     document.getElementById("edit-fecha").value = reg.fecha;
     document.getElementById("edit-horario").value = reg.horario;
     document.getElementById("edit-unidad").value = reg.unidad;
@@ -209,52 +236,67 @@ function abrirModalEditar(indexReal) {
 
 function cerrarModal() { document.getElementById("modalEditar").style.display = "none"; }
 
-function guardarCambiosModal() {
+async function guardarCambiosModal() {
+    const { doc, updateDoc } = window.firestoreLib;
     const idx = document.getElementById("edit-index").value;
+    const registroOriginal = datosHistorialCompleto[idx];
     const nuevaUnid = document.getElementById("edit-unidad").value;
 
-    // Actualizamos el registro en el array principal usando el índice real
-    datosHistorialCompleto[idx].fecha = document.getElementById("edit-fecha").value;
-    datosHistorialCompleto[idx].horario = document.getElementById("edit-horario").value;
-    datosHistorialCompleto[idx].unidad = nuevaUnid;
-    datosHistorialCompleto[idx].vueltas = document.getElementById("edit-vueltas").value;
-    datosHistorialCompleto[idx].extra = document.getElementById("edit-extra").value;
-    datosHistorialCompleto[idx].obs = document.getElementById("edit-obs").value;
+    const datosActualizados = {
+        fecha: document.getElementById("edit-fecha").value,
+        horario: document.getElementById("edit-horario").value,
+        unidad: nuevaUnid,
+        vueltas: document.getElementById("edit-vueltas").value,
+        extra: document.getElementById("edit-extra").value,
+        obs: document.getElementById("edit-obs").value,
+        chofer: baseDeDatosChoferes[nuevaUnid] ? baseDeDatosChoferes[nuevaUnid].chofer : "---"
+    };
 
-    // Actualizar chofer si cambió la unidad
-    if (baseDeDatosChoferes[nuevaUnid]) {
-        datosHistorialCompleto[idx].chofer = baseDeDatosChoferes[nuevaUnid].chofer;
-    } else {
-        datosHistorialCompleto[idx].chofer = "---";
+    try {
+        // Actualizamos en Firebase usando su ID único
+        const docRef = doc(window.db, "historialLogistica", registroOriginal.idFirebase);
+        await updateDoc(docRef, datosActualizados);
+        
+        alert("Cambios guardados en la nube.");
+        cerrarModal();
+        cargarHistorialDesdeFirebase(); // Recargamos para ver los cambios
+    } catch (e) {
+        console.error("Error al actualizar:", e);
+        alert("Error al guardar cambios.");
     }
-
-    // Guardar en LocalStorage y refrescar
-    localStorage.setItem("historialLogistica", JSON.stringify(datosHistorialCompleto));
-    cerrarModal();
-    renderizarTabla(datosHistorialCompleto);
 }
 
 function exportarHistorialExcel() {
     if (datosHistorialCompleto.length === 0) return alert("No hay datos.");
-    const hoja = XLSX.utils.json_to_sheet(datosHistorialCompleto);
+    // Quitamos el ID de Firebase para el Excel
+    const datosParaExcel = datosHistorialCompleto.map(({idFirebase, createdAt, ...resto}) => resto);
+    const hoja = XLSX.utils.json_to_sheet(datosParaExcel);
     const libro = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(libro, hoja, "Historial");
     XLSX.writeFile(libro, "Historial_Completo.xlsx");
 }
 
-function borrarTodoElHistorial() {
-    if (confirm("⚠️ ¿Borrar TODO el historial?") && confirm("🛑 ¿Estás REALMENTE seguro?")) {
-        localStorage.removeItem("historialLogistica");
-        datosHistorialCompleto = [];
-        renderizarTabla([]);
+async function borrarTodoElHistorial() {
+    if (confirm("⚠️ ¿Borrar TODO el historial de la NUBE?") && confirm("🛑 ¿Estás REALMENTE seguro? Esto afectará a todo el equipo.")) {
+        const { collection, getDocs, deleteDoc, doc } = window.firestoreLib;
+        const querySnapshot = await getDocs(collection(window.db, "historialLogistica"));
+        
+        // Firebase no tiene "borrar todo", hay que borrar uno por uno
+        const promesasBorrado = [];
+        querySnapshot.forEach((documento) => {
+            promesasBorrado.push(deleteDoc(doc(window.db, "historialLogistica", documento.id)));
+        });
+        
+        await Promise.all(promesasBorrado);
+        alert("Historial borrado completamente.");
+        cargarHistorialDesdeFirebase();
     }
 }
 
 window.onload = function() {
     const esHistorial = document.getElementById("tabla-historial-body");
     if (esHistorial) {
-        datosHistorialCompleto = JSON.parse(localStorage.getItem("historialLogistica")) || [];
-        renderizarTabla(datosHistorialCompleto);
+        cargarHistorialDesdeFirebase();
     } else {
         agregarFila();
     }
