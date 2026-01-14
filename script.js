@@ -310,7 +310,7 @@ async function borrarTodoElHistorial() {
         const { collection, getDocs, deleteDoc, doc } = window.firestoreLib;
         const querySnapshot = await getDocs(collection(window.db, "historialLogistica"));
         
-        // hay que borrar uno por uno
+        
         const promesasBorrado = [];
         querySnapshot.forEach((documento) => {
             promesasBorrado.push(deleteDoc(doc(window.db, "historialLogistica", documento.id)));
