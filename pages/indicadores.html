@@ -12,6 +12,20 @@
     <h1>DASHBOARD DE RENDIMIENTO</h1>
 
     <div class="resumen-container">
+        <div class="filtro-grupo-dashboard">
+            <label>FILTRAR POR DÍA:</label>
+            <input type="date" id="filtro-fecha-dashboard" class="input-calendario">
+            <button class="btn-excel" id="btn-aplicar-filtro">FILTRAR</button>
+            <button class="btn-historial" id="btn-quitar-filtro">VER TODO</button>
+        </div>
+    </div>
+
+    <div class="resumen-container">
+        <div class="kpi-card border-blue">
+            <span class="kpi-label">UNIDADES EN PERIODO</span>
+            <span id="kpi-unidades" class="kpi-value">0</span>
+        </div>
+
         <div class="kpi-card border-green">
             <span class="kpi-label">PRODUCTIVIDAD x UNIDAD</span>
             <span id="kpi-productividad" class="kpi-value">0.00</span>
@@ -23,8 +37,9 @@
         </div>
 
         <div class="acciones-botones">
+
             <a href="../index.html" class="btn-historial">VOLVER AL PANEL</a>
-            <button class="btn-excel" onclick="window.location.reload()">ACTUALIZAR</button>
+
         </div>
     </div>
 
@@ -48,61 +63,125 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        
-        async function generarIndicadores() {
-            const q = query(collection(db, "historialLogistica"), orderBy("createdAt", "asc"));
+
+        let datosGlobales = [];
+        let chartInstance = null;
+
+        async function obtenerDatos() {
+            const q = query(collection(db, "historialLogistica"), orderBy("fecha", "asc"));
             const querySnapshot = await getDocs(q);
-            let datos = [];
-            querySnapshot.forEach(doc => datos.push(doc.data()));
-
-            if (datos.length === 0) return;
-        
-            const totalVueltas = datos.reduce((sum, reg) => sum + Number(reg.vueltas), 0);
-            const totalUnidades = datos.length;
-            const totalExtras = datos.filter(reg => Number(reg.extra) > 0).length;
-
-            const productividad = (totalVueltas / totalUnidades).toFixed(2);
-            const ratioExtras = ((totalExtras / totalUnidades) * 100).toFixed(0) + "%";
+            datosGlobales = [];
+            querySnapshot.forEach(doc => datosGlobales.push(doc.data()));
             
-            document.getElementById('kpi-productividad').innerText = productividad;
-            document.getElementById('kpi-extras').innerText = ratioExtras;
-            
-            const historialPorFecha = {};
-            datos.forEach(reg => {
-                historialPorFecha[reg.fecha] = (historialPorFecha[reg.fecha] || 0) + Number(reg.vueltas);
-            });
-
-            const etiquetasFechas = Object.keys(historialPorFecha);
-            const valoresVueltas = Object.values(historialPorFecha);
-
-            renderizarGrafico(etiquetasFechas, valoresVueltas);
+            actualizarDashboard(datosGlobales);
         }
 
-        function renderizarGrafico(fechas, vueltas) {
+function actualizarDashboard(datos) {
+            if (datos.length === 0) {
+                document.getElementById('kpi-unidades').innerText = "0";
+                document.getElementById('kpi-productividad').innerText = "0.00";
+                document.getElementById('kpi-extras').innerText = "0%";
+                return;
+            }
+
+            // KPIs
+            const totalUnidades = datos.length;
+            const totalVueltas = datos.reduce((sum, reg) => sum + Number(reg.vueltas), 0);
+
+            const totalExtras = datos.filter(reg => Number(reg.extra) > 0).length;
+
+            document.getElementById('kpi-unidades').innerText = totalUnidades;
+            document.getElementById('kpi-productividad').innerText = (totalVueltas / totalUnidades).toFixed(2);
+            document.getElementById('kpi-extras').innerText = ((totalExtras / totalUnidades) * 100).toFixed(0) + "%";
+
+            // PROCESAMIENTO PARA GRÁFICO 
+            const statsPorDia = {};
+            datos.forEach(reg => {
+                if (!statsPorDia[reg.fecha]) {
+                    statsPorDia[reg.fecha] = { vueltas: 0, unidades: 0 };
+                }
+                statsPorDia[reg.fecha].vueltas += Number(reg.vueltas);
+                statsPorDia[reg.fecha].unidades += 1; 
+            });
+
+            const fechas = Object.keys(statsPorDia);
+            const dataVueltas = fechas.map(f => statsPorDia[f].vueltas);
+            const dataUnidades = fechas.map(f => statsPorDia[f].unidades);
+
+            renderizarGrafico(fechas, dataVueltas, dataUnidades);
+        }
+
+        function renderizarGrafico(fechas, vueltas, unidades) {
             const ctx = document.getElementById('graficoVueltas').getContext('2d');
-            new Chart(ctx, {
+            
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            chartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: fechas,
-                    datasets: [{
-                        label: 'Suma de Vueltas por Día',
-                        data: vueltas,
-                        borderColor: '#2d7a44',
-                        backgroundColor: 'rgba(45, 122, 68, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.3
-                    }]
+                    datasets: [
+                        {
+                            label: 'Vueltas Totales',
+                            data: vueltas,
+                            borderColor: '#2d7a44', 
+                            backgroundColor: 'rgba(45, 122, 68, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.3,
+                            fill: true,
+                            yAxisID: 'y' 
+                        },
+                        {
+                            label: 'Unidades Presentes',
+                            data: unidades,
+                            borderColor: '#007bff', 
+                            backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.3,
+                            fill: false,
+                            yAxisID: 'y1' 
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true } }
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: { display: true, text: 'Vueltas' },
+                            beginAtZero: true
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: { display: true, text: 'Unidades' },
+                            beginAtZero: true,
+                            grid: { drawOnChartArea: false } // No ensucia el gráfico
+                        }
+                    }
                 }
             });
         }
+        // Eventos de Filtros
+        document.getElementById('btn-aplicar-filtro').addEventListener('click', () => {
+            const fechaFiltro = document.getElementById('filtro-fecha-dashboard').value;
+            if (!fechaFiltro) return;
+            const filtrados = datosGlobales.filter(d => d.fecha === fechaFiltro);
+            actualizarDashboard(filtrados);
+        });
 
-        generarIndicadores();
+        document.getElementById('btn-quitar-filtro').addEventListener('click', () => {
+            document.getElementById('filtro-fecha-dashboard').value = "";
+            actualizarDashboard(datosGlobales);
+        });
+
+        obtenerDatos();
     </script>
 </body>
 </html>
