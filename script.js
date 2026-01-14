@@ -1,4 +1,4 @@
-// 1. Base de Datos Completa de Choferes (Se mantiene igual)
+//  Base de Datos Completa de Choferes 
 const baseDeDatosChoferes = {
     "99": { modelo: "Renault Master 2,5 DCL", tamaño: "Grande", chofer: "Carlos Vitale" },
     "591": { modelo: "Citroen Jumper", tamaño: "Grande", chofer: "Emanuel Suarez" },
@@ -128,7 +128,7 @@ function exportarExcel() {
     XLSX.writeFile(libro, `Logistica_${obtenerFechaHoy().replace(/\//g, '-')}.xlsx`);
 }
 
-// Nueva función para guardar cada registro en Firebase
+// guardar cada registro en Firebase
 async function guardarEnFirebase(registro) {
     try {
         await window.firestoreLib.addDoc(window.firestoreLib.collection(window.db, "historialLogistica"), registro);
@@ -139,7 +139,7 @@ async function guardarEnFirebase(registro) {
 
 async function limpiarDia() {
     if (confirm("¿Deseas archivar los datos de hoy en la nube para todo el equipo?")) {
-        // Recorremos las filas para guardar en Firebase
+        
         for (let i = 1; i <= contadorFilas; i++) {
             const unid = document.getElementById(`input-unidad-${i}`).value;
             if (unid !== "") {
@@ -151,13 +151,13 @@ async function limpiarDia() {
                     vueltas: document.getElementById(`select-vueltas-${i}`).value,
                     extra: document.getElementById(`select-extra-${i}`).value,
                     obs: document.getElementById(`input-obs-${i}`).value,
-                    createdAt: new Date() // Para ordenar cronológicamente
+                    createdAt: new Date() 
                 };
                 await guardarEnFirebase(registro);
             }
         }
         
-        // Limpiamos la tabla visualmente
+
         document.getElementById("tabla-body").innerHTML = "";
         contadorFilas = 0;
         agregarFila();
@@ -168,7 +168,7 @@ async function limpiarDia() {
 
 // --- GESTIÓN DE HISTORIAL (ACTUALIZADO CON FIREBASE) ---
 
-// Nueva función para traer los datos desde Firebase
+
 async function cargarHistorialDesdeFirebase() {
     const { collection, getDocs, query, orderBy } = window.firestoreLib;
     const q = query(collection(window.db, "historialLogistica"), orderBy("createdAt", "desc"));
@@ -177,7 +177,7 @@ async function cargarHistorialDesdeFirebase() {
         const querySnapshot = await getDocs(q);
         datosHistorialCompleto = [];
         querySnapshot.forEach((doc) => {
-            // Guardamos el ID de Firebase para poder editar o borrar luego
+
             datosHistorialCompleto.push({ idFirebase: doc.id, ...doc.data() });
         });
         renderizarTabla(datosHistorialCompleto);
@@ -253,13 +253,13 @@ async function guardarCambiosModal() {
     };
 
     try {
-        // Actualizamos en Firebase usando su ID único
+        // Firebase usando su ID único
         const docRef = doc(window.db, "historialLogistica", registroOriginal.idFirebase);
         await updateDoc(docRef, datosActualizados);
         
         alert("Cambios guardados en la nube.");
         cerrarModal();
-        cargarHistorialDesdeFirebase(); // Recargamos para ver los cambios
+        cargarHistorialDesdeFirebase(); 
     } catch (e) {
         console.error("Error al actualizar:", e);
         alert("Error al guardar cambios.");
@@ -268,7 +268,7 @@ async function guardarCambiosModal() {
 
 function exportarHistorialExcel() {
     if (datosHistorialCompleto.length === 0) return alert("No hay datos.");
-    // Quitamos el ID de Firebase para el Excel
+
     const datosParaExcel = datosHistorialCompleto.map(({idFirebase, createdAt, ...resto}) => resto);
     const hoja = XLSX.utils.json_to_sheet(datosParaExcel);
     const libro = XLSX.utils.book_new();
@@ -281,7 +281,7 @@ async function borrarTodoElHistorial() {
         const { collection, getDocs, deleteDoc, doc } = window.firestoreLib;
         const querySnapshot = await getDocs(collection(window.db, "historialLogistica"));
         
-        // Firebase no tiene "borrar todo", hay que borrar uno por uno
+        // hay que borrar uno por uno
         const promesasBorrado = [];
         querySnapshot.forEach((documento) => {
             promesasBorrado.push(deleteDoc(doc(window.db, "historialLogistica", documento.id)));
@@ -293,10 +293,17 @@ async function borrarTodoElHistorial() {
     }
 }
 
+// --- INICIO  ---
 window.onload = function() {
     const esHistorial = document.getElementById("tabla-historial-body");
+    
     if (esHistorial) {
-        cargarHistorialDesdeFirebase();
+        const checkDB = setInterval(() => {
+            if (window.db) {
+                clearInterval(checkDB);
+                cargarHistorialDesdeFirebase();
+            }
+        }, 100); 
     } else {
         agregarFila();
     }
