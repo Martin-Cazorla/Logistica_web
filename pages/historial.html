@@ -30,6 +30,7 @@
         </div>
 
         <div class="acciones-botones">
+            <a href="../pages/indicadores.html" class="btn-excel" style="text-decoration: none; background-color: #007bff;">VER INDICADORES</a>
             <a href="../index.html" class="btn-historial" style="text-decoration: none;">VOLVER AL PANEL</a>
             <button class="btn-excel" onclick="limpiarFiltrosBusqueda()" style="background-color: #6c757d;">LIMPIAR FILTROS</button>
             <button class="btn-excel" onclick="exportarHistorialExcel()">DESCARGAR EXCEL</button>
@@ -118,7 +119,7 @@
         if (typeof cargarHistorialDesdeFirebase === "function") {
             cargarHistorialDesdeFirebase();
         }
-        
+
     </script>
     <script src="../script.js"></script>
 </body>

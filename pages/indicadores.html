@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indicadores de Rendimiento</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <h1>DASHBOARD DE RENDIMIENTO</h1>
+
+    <div class="resumen-container">
+        <div class="kpi-card" style="border-left: 5px solid #28a745;">
+            <span class="kpi-label">PRODUCTIVIDAD x UNIDAD</span>
+            <span id="kpi-productividad" class="kpi-value">0.00</span>
+        </div>
+        
+        <div class="kpi-card" style="border-left: 5px solid #ffc107;">
+            <span class="kpi-label">RATIO DE EXTRAS</span>
+            <span id="kpi-extras" class="kpi-value">0%</span>
+        </div>
+
+        <div class="acciones-botones">
+            <a href="../index.html" class="btn-historial" style="text-decoration: none;">VOLVER AL PANEL</a>
+            <button class="btn-excel" onclick="window.location.reload()">ACTUALIZAR</button>
+        </div>
+    </div>
+
+    <div class="resumen-container" style="background: white; padding: 20px; border-radius: 8px; margin-top: 20px;">
+        <canvas id="graficoVueltas" width="400" height="150"></canvas>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBa1n9yQJ33viJ_3P-99yuL4-fzQFzLPis",
+            authDomain: "logistica-envios-44bf6.firebaseapp.com",
+            projectId: "logistica-envios-44bf6",
+            storageBucket: "logistica-envios-44bf6.firebasestorage.app",
+            messagingSenderId: "611013572218",
+            appId: "1:611013572218:web:beb687be674a65ceafadc3",
+            measurementId: "G-V14SKXYCJ5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Función para procesar datos y mostrar KPIs
+        async function generarIndicadores() {
+            const q = query(collection(db, "historialLogistica"), orderBy("createdAt", "asc"));
+            const querySnapshot = await getDocs(q);
+            let datos = [];
+            querySnapshot.forEach(doc => datos.push(doc.data()));
+
+            if (datos.length === 0) return;
+
+            // 1. Cálculos de KPIs
+            const totalVueltas = datos.reduce((sum, reg) => sum + Number(reg.vueltas), 0);
+            const totalUnidades = datos.length;
+            const totalExtras = datos.filter(reg => Number(reg.extra) > 0).length;
+
+            const productividad = (totalVueltas / totalUnidades).toFixed(2);
+            const ratioExtras = ((totalExtras / totalUnidades) * 100).toFixed(0) + "%";
+
+            // Mostrar en pantalla
+            document.getElementById('kpi-productividad').innerText = productividad;
+            document.getElementById('kpi-extras').innerText = ratioExtras;
+
+            // 2. Preparar datos para el gráfico (Vueltas por Fecha)
+            const historialPorFecha = {};
+            datos.forEach(reg => {
+                historialPorFecha[reg.fecha] = (historialPorFecha[reg.fecha] || 0) + Number(reg.vueltas);
+            });
+
+            const etiquetasFechas = Object.keys(historialPorFecha);
+            const valoresVueltas = Object.values(historialPorFecha);
+
+            renderizarGrafico(etiquetasFechas, valoresVueltas);
+        }
+
+        function renderizarGrafico(fechas, vueltas) {
+            const ctx = document.getElementById('graficoVueltas').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: fechas,
+                    datasets: [{
+                        label: 'Suma de Vueltas por Día',
+                        data: vueltas,
+                        borderColor: '#218838',
+                        backgroundColor: 'rgba(33, 136, 56, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+
+        generarIndicadores();
+    </script>
+</body>
+</html>
