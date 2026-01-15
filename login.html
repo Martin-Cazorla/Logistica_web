@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso Logística - E-commerce</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="login-body">
+
+    <div class="login-container">
+        <h2>SISTEMA DE LOGÍSTICA</h2>
+        <p>Por favor, inicie sesión para continuar</p>
+        
+        <div class="form-group">
+            <label>Email:</label>
+            <input type="email" id="login-email" placeholder="usuario@supermercado.com">
+        </div>
+        
+        <div class="form-group">
+            <label>Contraseña:</label>
+            <input type="password" id="login-pass" placeholder="******">
+        </div>
+
+        <button class="btn-excel" id="btn-entrar" style="width: 100%; margin-top: 10px;">INGRESAR</button>
+        <p id="login-error" style="color: red; display: none; margin-top: 10px;">Credenciales incorrectas</p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBa1n9yQJ33viJ_3P-99yuL4-fzQFzLPIs",
+            authDomain: "logistica-envios-44bf6.firebaseapp.com",
+            projectId: "logistica-envios-44bf6",
+            storageBucket: "logistica-envios-44bf6.firebasestorage.app",
+            messagingSenderId: "611013572218",
+            appId: "1:611013572218:web:beb687be674a65ceafadc3",
+            measurementId: "G-V14SKXYCJ5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        document.getElementById('btn-entrar').onclick = async () => {
+            const email = document.getElementById('login-email').value.trim(); 
+            const pass = document.getElementById('login-pass').value;
+            const errorMsg = document.getElementById('login-error');
+
+            try {
+            // Forzamos que la sesión se guarde en el navegador
+                await setPersistence(auth, browserLocalPersistence);
+            
+                const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+                console.log("¡Éxito! Bienvenido:", userCredential.user.email);
+                window.location.href = "index.html"; 
+            } catch (error) {
+                console.error("CÓDIGO DE ERROR REAL:", error.code);
+                console.error("MENSAJE:", error.message);
+            
+                errorMsg.innerText = `Error: ${error.code}`; 
+                errorMsg.style.display = "block";
+            }
+        };
+    </script>
+</body>
+</html>

@@ -1,24 +1,4 @@
-// --- CONFIGURACIÓN DE FIREBASE ---
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, getDocs, query, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-const firebaseConfig = {
-    apiKey: "AIzaSyBa1n9yQJ33viJ_3P-99yuL4-fzQFzLPis",
-    authDomain: "logistica-envios-44bf6.firebaseapp.com",
-    projectId: "logistica-envios-44bf6",
-    storageBucket: "logistica-envios-44bf6.firebasestorage.app",
-    messagingSenderId: "611013572218",
-    appId: "1:611013572218:web:beb687be674a65ceafadc3",
-    measurementId: "G-V14SKXYCJ5"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// Hacemos las herramientas accesibles globalmente para que funcionen los onclick del HTML
-window.db = db;
-window.firestoreLib = { collection, getDocs, query, doc, updateDoc, deleteDoc };
-
+// historial.js - GESTIÓN DE ARCHIVOS Y RENDIMIENTO
 let datosGlobales = [];
 
 // --- LÓGICA DE CARGA Y RENDERIZADO ---
@@ -29,17 +9,24 @@ function convertirFechaParaOrdenar(fechaStr) {
     return new Date(anio, mes - 1, dia);
 }
 
-async function cargarHistorialDesdeFirebase() {
+// Función global para que historial.html pueda llamarla tras verificar el login
+window.cargarHistorialDesdeFirebase = async function() {
+    if (!window.firestoreLib || !window.db) return; 
+
+    const { collection, getDocs, query } = window.firestoreLib;
     try {
-        const q = query(collection(db, "historialLogistica"));
+        const q = query(collection(window.db, "historialLogistica"));
         const querySnapshot = await getDocs(q);
+        
         datosGlobales = [];
         querySnapshot.forEach(doc => {
             datosGlobales.push({ idFirebase: doc.id, ...doc.data() });
         });
 
+        // Ordenamos: Lo más nuevo primero para ver el rendimiento reciente
         datosGlobales.sort((a, b) => convertirFechaParaOrdenar(b.fecha) - convertirFechaParaOrdenar(a.fecha));
         renderizarTablaHistorial(datosGlobales);
+        console.log("Historial cargado correctamente desde Firebase.");
     } catch (e) {
         console.error("Error al obtener datos:", e);
     }
@@ -60,14 +47,16 @@ function renderizarTablaHistorial(lista) {
             <td>${reg.vueltas}</td>
             <td>${reg.extra}</td>
             <td>${reg.obs}</td>
-            <td><button onclick="abrirModalEditar('${reg.idFirebase}')" style="border:none; background:none; cursor:pointer;">✏️</button></td>
+            <td>
+                <button onclick="window.abrirModalEditar('${reg.idFirebase}')" class="btn-editar">✏️</button>
+            </td>
         </tr>
     `).join('');
 }
 
-// --- FILTROS Y BÚSQUEDA ---
+// --- FILTROS DE BÚSQUEDA ---
 
-window.filtrarHistorial = function() {
+const ejecutarFiltros = () => {
     const fFechaRaw = document.getElementById("filtro-fecha").value;
     const fUnidad = document.getElementById("filtro-unidad").value.trim();
     
@@ -81,20 +70,14 @@ window.filtrarHistorial = function() {
     }
 
     const resultados = datosGlobales.filter(reg => {
-        const valorFecha = String(reg.fecha || reg.Fecha || "").trim();
+        const valorFecha = String(reg.fecha || "").trim();
         const coincideUnidad = fUnidad === "" || String(reg.unidad).trim() === fUnidad;
         const coincideFecha = fFechaRaw === "" || (valorFecha === fechaConCero || valorFecha === fechaSinCero);
         return coincideUnidad && coincideFecha;
     });
 
     renderizarTablaHistorial(resultados);
-};
-
-window.limpiarFiltrosBusqueda = function() {
-    document.getElementById("filtro-fecha").value = "";
-    document.getElementById("filtro-unidad").value = "";
-    renderizarTablaHistorial(datosGlobales);
-};
+};    
 
 // --- GESTIÓN DE MODAL Y EDICIÓN ---
 
@@ -102,7 +85,7 @@ window.abrirModalEditar = function(idFirebase) {
     const registro = datosGlobales.find(r => r.idFirebase === idFirebase);
     if (!registro) return;
 
-    document.getElementById('edit-index').value = idFirebase;
+    document.getElementById('edit-id').value = idFirebase;
     document.getElementById('edit-fecha').value = registro.fecha;
     document.getElementById('edit-horario').value = registro.horario;
     document.getElementById('edit-unidad').value = registro.unidad;
@@ -113,12 +96,13 @@ window.abrirModalEditar = function(idFirebase) {
     document.getElementById('modalEditar').style.display = 'block';
 };
 
-window.cerrarModal = function() {
+const cerrarModal = () => {
     document.getElementById('modalEditar').style.display = 'none';
 };
 
-window.guardarCambiosModal = async function() {
-    const idFirebase = document.getElementById('edit-index').value;
+const guardarCambios = async () => {
+    const { doc, updateDoc } = window.firestoreLib;
+    const idFirebase = document.getElementById('edit-id').value;
     const nuevosDatos = {
         fecha: document.getElementById('edit-fecha').value,
         horario: document.getElementById('edit-horario').value,
@@ -129,37 +113,54 @@ window.guardarCambiosModal = async function() {
     };
 
     try {
-        await updateDoc(doc(db, "historialLogistica", idFirebase), nuevosDatos);
-        alert("Registro actualizado!");
+        await updateDoc(doc(window.db, "historialLogistica", idFirebase), nuevosDatos);
+        alert("¡Registro actualizado correctamente!");
         cerrarModal();
-        cargarHistorialDesdeFirebase();
+        window.cargarHistorialDesdeFirebase(); 
     } catch (e) {
-        console.error("Error al actualizar:", e);
+        alert("Error al actualizar.");
     }
 };
 
-// --- EXPORTACIÓN Y BORRADO ---
+// --- ASIGNACIÓN DE EVENTOS ---
 
-window.exportarHistorialExcel = function() {
-    if (datosGlobales.length === 0) return alert("No hay datos.");
-    const hoja = XLSX.utils.json_to_sheet(datosGlobales);
-    const libro = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(libro, hoja, "Historial");
-    XLSX.writeFile(libro, "Historial_Logistica.xlsx");
-};
+document.addEventListener("DOMContentLoaded", () => {
+    // Escuchar filtros
+    document.getElementById("filtro-fecha").addEventListener("input", ejecutarFiltros);
+    document.getElementById("filtro-unidad").addEventListener("input", ejecutarFiltros);
+    
+    // Botones de acción
+    document.getElementById("btn-limpiar-filtros").onclick = () => {
+        document.getElementById("filtro-fecha").value = "";
+        document.getElementById("filtro-unidad").value = "";
+        renderizarTablaHistorial(datosGlobales);
+    };
 
-window.borrarTodoElHistorial = async function() {
-    if (!confirm("¿ESTÁS SEGURO? Se borrarán todos los datos de Firebase.")) return;
-    try {
-        for (let reg of datosGlobales) {
-            await deleteDoc(doc(db, "historialLogistica", reg.idFirebase));
+    document.getElementById("btn-descargar-excel").onclick = () => {
+        if (datosGlobales.length === 0) return alert("No hay datos para exportar.");
+        const hoja = XLSX.utils.json_to_sheet(datosGlobales);
+        const libro = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(libro, hoja, "Historial_Logistica");
+        XLSX.writeFile(libro, "Reporte_Envíos.xlsx");
+    };
+
+    document.getElementById("btn-borrar-todo").onclick = async () => {
+        const { doc, deleteDoc } = window.firestoreLib;
+        if (!confirm("¿Eliminar TODO el historial? Esta acción no se puede deshacer.")) return;
+        
+        try {
+            for (let reg of datosGlobales) {
+                await deleteDoc(doc(window.db, "historialLogistica", reg.idFirebase));
+            }
+            alert("Historial vaciado.");
+            window.cargarHistorialDesdeFirebase();
+        } catch (e) {
+            alert("Error al borrar.");
         }
-        alert("Historial vaciado.");
-        cargarHistorialDesdeFirebase();
-    } catch (e) {
-        console.error("Error al borrar:", e);
-    }
-};
+    };
 
-// INICIALIZACIÓN
-cargarHistorialDesdeFirebase();
+    // Modal
+    document.getElementById("btn-cerrar-modal").onclick = cerrarModal;
+    document.getElementById("btn-guardar-modal").onclick = guardarCambios;
+
+});

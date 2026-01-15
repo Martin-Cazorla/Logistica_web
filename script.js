@@ -1,116 +1,131 @@
-// script.js - ENFOCADO EN PANEL DE CARGA DIARIA
+// script.js - CARGA CONTINUA POR TECLA ENTER
+import { unidadesData } from './config.js';
 
-let contadorFilas = 0;
+const tbody = document.getElementById("tabla-body");
+const fechaActual = new Date().toLocaleDateString('es-AR');
 
-// --- LÓGICA DE CARGA DIARIA ---
-
-// Función para agregar una fila nueva al presionar Enter o al cargar la página
-function agregarFila() {
-    const tbody = document.getElementById("tabla-body");
-    if (!tbody) return; 
+// 1. Función para crear la fila con detección de Enter
+function agregarFilaVacia() {
+    const fila = document.createElement("tr");
     
-    contadorFilas++;
-    const nuevaFila = document.createElement("tr");
-    nuevaFila.id = `fila-${contadorFilas}`;
-    nuevaFila.innerHTML = `
-        <td class="cell-fecha">${obtenerFechaHoy()}</td>
-        <td><select id="select-horario-${contadorFilas}" onchange="actualizarFila(${contadorFilas})">
-            <option value="10:00hs">10:00hs</option>
-            <option value="11:00hs">11:00hs</option>
-            <option value="Electro">Electro</option>
-            <option value="Agregado">Agregado</option>
-            <option value="No se presenta">No se presenta</option>
-        </select></td>
-        <td><input type="text" id="input-unidad-${contadorFilas}" oninput="actualizarFila(${contadorFilas})" placeholder="N°"></td>
-        <td id="cell-modelo-${contadorFilas}">---</td>
-        <td id="cell-tamaño-${contadorFilas}">---</td>
-        <td id="cell-chofer-${contadorFilas}">---</td>
-        <td><select id="select-vueltas-${contadorFilas}">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-        </select></td>
-        <td><select id="select-extra-${contadorFilas}" onchange="actualizarFila(${contadorFilas})">
-            <option value="0">0</option>
-            <option value="1">1</option>
-        </select></td>
-        <td class="col-obs"><input type="text" id="input-obs-${contadorFilas}" placeholder="..."></td>
-        <td id="cell-presencia-${contadorFilas}" class="presencia-dato">0</td>
+    fila.innerHTML = `
+        <td>${fechaActual}</td>
+        <td>
+            <select class="input-horario">
+                <option value="10:00hs">10:00hs</option>
+                <option value="11:00hs">11:00hs</option>
+                <option value="Electro">Electro</option>
+                <option value="Agregado">Agregado</option>
+            </select>
+        </td>
+        <td>
+            <input type="text" class="input-id-unidad" placeholder="N°..." style="width: 60px; font-weight: bold;">
+        </td>
+        <td class="res-modelo" style="color: #666;">-</td>
+        <td class="res-tamano" style="color: #666;">-</td>
+        <td class="res-chofer">
+            <input type="text" class="input-chofer" placeholder="Chofer...">
+        </td>
+        <td>
+            <select class="input-vueltas">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="0">0</option>
+            </select>
+        </td>
+        <td>
+            <select class="input-extra" onchange="actualizarContadores()">
+                <option value="0">0</option>
+                <option value="1">1</option>
+            </select>
+        </td>
+        <td><input type="text" class="input-obs" placeholder="..."></td>
+        <td>
+            <button class="btn-limpiar" style="padding: 2px 5px; background-color: #6c757d;" onclick="this.closest('tr').remove(); actualizarContadores();">X</button>
+        </td>
     `;
-    tbody.appendChild(nuevaFila);
 
-    // Salto automático de celda al presionar Enter
-    const inputUnidad = document.getElementById(`input-unidad-${contadorFilas}`);
-    inputUnidad.focus(); // Pone el foco automáticamente en la nueva unidad
+    const inputID = fila.querySelector('.input-id-unidad');
     
-    inputUnidad.addEventListener("keydown", function(e) {
-        if (e.key === "Enter") {
-            e.preventDefault(); 
-            agregarFila(); 
+    // ESCUCHA DE DATOS (Búsqueda automática)
+    inputID.addEventListener('input', (e) => {
+        const idIngresado = e.target.value.trim();
+        const unidadEncontrada = unidadesData.find(u => u.id === idIngresado);
+
+        if (unidadEncontrada) {
+            fila.querySelector('.res-modelo').innerText = unidadEncontrada.modelo;
+            fila.querySelector('.res-tamano').innerText = unidadEncontrada.tamaño;
+            fila.querySelector('.input-chofer').value = unidadEncontrada.chofer;
+            inputID.style.backgroundColor = "#d4edda"; 
+        } else {
+            fila.querySelector('.res-modelo').innerText = "-";
+            fila.querySelector('.res-tamano').innerText = "-";
+            fila.querySelector('.input-chofer').value = "";
+            inputID.style.backgroundColor = ""; 
+        }
+        actualizarContadores();
+    });
+
+    // --- EL TRUCO DEL ENTER ---
+    inputID.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // Evita comportamientos raros
+            if (inputID.value.trim() !== "") {
+                agregarFilaVacia(); // Crea la siguiente fila automáticamente
+            }
         }
     });
+
+    tbody.appendChild(fila);
+    inputID.focus(); 
 }
 
-// Función que cruza el ID de unidad con la base de datos de config.js
-window.actualizarFila = function(idFila) {
-    const unidadId = document.getElementById(`input-unidad-${idFila}`).value.trim();
-    const horario = document.getElementById(`select-horario-${idFila}`).value;     
-    const resultado = baseDeDatosChoferes[unidadId];     
-    const cellPresencia = document.getElementById(`cell-presencia-${idFila}`);
+// 2. Iniciar con una fila apenas abre la app
+agregarFilaVacia();
+actualizarContadores();
 
-    if (resultado) {
-        document.getElementById(`cell-modelo-${idFila}`).innerText = resultado.modelo;
-        document.getElementById(`cell-tamaño-${idFila}`).innerText = resultado.tamaño;
-        document.getElementById(`cell-chofer-${idFila}`).innerText = resultado.chofer;
-        cellPresencia.innerText = (horario === "No se presenta") ? "0" : "1";
-    } else {
-        ["modelo", "tamaño", "chofer"].forEach(id => {
-            const el = document.getElementById(`cell-${id}-${idFila}`);
-            if(el) el.innerText = "---";
-        });
-        cellPresencia.innerText = "0";
-    }
-    calcularTotalesCarga();
-};
+// 3. KPI y Archivar 
+window.actualizarContadores = () => {
+    const filas = document.querySelectorAll('#tabla-body tr');
+    document.getElementById('contador-unidades').innerText = filas.length;
 
-// Cálculo de KPIs en tiempo real para el Panel
-function calcularTotalesCarga() {
-    let totalUnidades = 0;
     let totalExtras = 0;
-
-    // Unidades presentes
-    document.querySelectorAll(".presencia-dato").forEach(celda => {
-        totalUnidades += parseInt(celda.innerText) || 0;
+    filas.forEach(fila => {
+        totalExtras += parseInt(fila.querySelector('.input-extra').value) || 0;
     });
-
-    // Extras (buscamos todos los select de extra)
-    document.querySelectorAll('[id^="select-extra-"]').forEach(select => {
-        totalExtras += parseInt(select.value) || 0;
-    });
-
-    if(document.getElementById("contador-unidades")) {
-        document.getElementById("contador-unidades").innerText = totalUnidades;
-    }
-    if(document.getElementById("contador-extras")) {
-        document.getElementById("contador-extras").innerText = totalExtras;
-    }
-}
-
-// Inicio al cargar la página
-window.onload = function() {    
-    if (document.getElementById("tabla-body")) {
-        agregarFila();
-  }
+    document.getElementById('contador-extras').innerText = totalExtras;
 };
 
-window.exportarExcel = function() {
-    const tabla = document.querySelector(".tabla-logistica");
-    if (!tabla) return alert("No hay tabla para exportar");
+document.getElementById('btn-archivar').onclick = async () => {
+    const { collection, addDoc } = window.firestoreLib;
+    const filas = tbody.querySelectorAll('tr');
+    
+    // Filtrar filas vacías antes de guardar
+    const filasConDatos = Array.from(filas).filter(f => f.querySelector('.input-id-unidad').value !== "");
 
-    // Crea el Excel directamente desde el elemento HTML de la tabla
-    const hoja = XLSX.utils.table_to_sheet(tabla);
-    const libro = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(libro, hoja, "Carga_Diaria");
+    if (filasConDatos.length === 0) return alert("No hay unidades para archivar.");
+    if (!confirm(`¿Archivar las ${filasConDatos.length} unidades registradas?`)) return;
 
-    XLSX.writeFile(libro, `Logistica_Dia_${obtenerFechaHoy().replace(/\//g, '-')}.xlsx`);
+    try {
+        for (let fila of filasConDatos) {
+            const data = {
+                fecha: fechaActual,
+                horario: fila.querySelector('.input-horario').value,
+                unidad: fila.querySelector('.input-id-unidad').value,
+                chofer: fila.querySelector('.input-chofer').value,
+                vueltas: fila.querySelector('.input-vueltas').value,
+                extra: fila.querySelector('.input-extra').value,
+                obs: fila.querySelector('.input-obs').value
+            };
+            await addDoc(collection(window.db, "historialLogistica"), data);
+        }
+        alert("¡Todo guardado correctamente!");
+        tbody.innerHTML = ""; 
+        agregarFilaVacia(); // Reiniciar con una fila limpia
+        actualizarContadores();
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Error al guardar.");
+    }
 };

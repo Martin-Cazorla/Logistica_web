@@ -1,27 +1,16 @@
 // indicadores.js - Lógica del Dashboard y Estadísticas
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, getDocs, query } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-const firebaseConfig = {
-    apiKey: "AIzaSyBa1n9yQJ33viJ_3P-99yuL4-fzQFzLPis",
-    authDomain: "logistica-envios-44bf6.firebaseapp.com",
-    projectId: "logistica-envios-44bf6",
-    storageBucket: "logistica-envios-44bf6.firebasestorage.app",
-    messagingSenderId: "611013572218",
-    appId: "1:611013572218:web:beb687be674a65ceafadc3",
-    measurementId: "G-V14SKXYCJ5"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
 let datosGlobales = [];
 let chartInstance = null;
 
 // --- CARGA DE DATOS ---
-async function obtenerDatos() {
+// La hacemos global para que el HTML la dispare al verificar el usuario
+window.obtenerDatos = async function() {
+    if (!window.firestoreLib || !window.db) return;
+
+    const { collection, getDocs, query } = window.firestoreLib;
+    
     try {
-        const q = query(collection(db, "historialLogistica"));
+        const q = query(collection(window.db, "historialLogistica"));
         const querySnapshot = await getDocs(q);
         datosGlobales = [];
         querySnapshot.forEach(doc => {
@@ -29,6 +18,7 @@ async function obtenerDatos() {
         });
         
         actualizarDashboard(datosGlobales);
+        console.log("Indicadores actualizados desde Firebase.");
     } catch (e) {
         console.error("Error al obtener datos:", e);
     }
@@ -109,26 +99,25 @@ function renderizarGrafico(fechas, vueltas, unidades) {
 }
 
 // --- EVENTOS DE FILTRO ---
-document.getElementById('btn-aplicar-filtro').onclick = () => {
-    const f = document.getElementById('filtro-fecha-dashboard').value;
-    if (!f) return alert("Selecciona una fecha");
-    
-    const [y, m, d] = f.split("-");
-    const fechaConCero = `${d}/${m}/${y}`; 
-    const fechaSinCero = `${parseInt(d)}/${parseInt(m)}/${y}`;
-      
-    const filtrados = datosGlobales.filter(reg => {
-        const valorFecha = String(reg.fecha || "").trim();
-        return valorFecha === fechaConCero || valorFecha === fechaSinCero;
-    });
-    
-    actualizarDashboard(filtrados);
-};
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById('btn-aplicar-filtro').onclick = () => {
+        const f = document.getElementById('filtro-fecha-dashboard').value;
+        if (!f) return alert("Selecciona una fecha");
+        
+        const [y, m, d] = f.split("-");
+        const fechaConCero = `${d}/${m}/${y}`; 
+        const fechaSinCero = `${parseInt(d)}/${parseInt(m)}/${y}`;
+          
+        const filtrados = datosGlobales.filter(reg => {
+            const valorFecha = String(reg.fecha || "").trim();
+            return valorFecha === fechaConCero || valorFecha === fechaSinCero;
+        });
+        
+        actualizarDashboard(filtrados);
+    };
 
-document.getElementById('btn-quitar-filtro').onclick = () => {
-    document.getElementById('filtro-fecha-dashboard').value = "";
-    actualizarDashboard(datosGlobales);
-};
-
-// Iniciar carga al abrir
-obtenerDatos();
+    document.getElementById('btn-quitar-filtro').onclick = () => {
+        document.getElementById('filtro-fecha-dashboard').value = "";
+        actualizarDashboard(datosGlobales);
+    };
+});
