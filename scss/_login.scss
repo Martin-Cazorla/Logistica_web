@@ -1,0 +1,25 @@
+// Estilos específicos para la pantalla de inicio de sesión
+.login-container {
+    max-width: 400px;
+    margin: 100px auto;
+    background: white;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    
+    input {
+        width: 100%;
+        margin-bottom: 20px;
+        padding: 10px;
+    }
+
+    .btn-ingresar {
+        background-color: $verde-logistica;
+        color: white;
+        width: 100%;
+        padding: 12px;
+        border: none;
+        cursor: pointer;
+        font-weight: bold;
+    }
+}

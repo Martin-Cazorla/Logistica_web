@@ -1,0 +1,36 @@
+.resumen-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: white;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border-top: 5px solid $verde-logistica; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.kpi-card {
+    text-align: center;
+    padding: 10px 20px;
+
+    &.border-green { border-left: 5px solid $verde-logistica; }
+    &.border-yellow { border-left: 5px solid $warning-yellow; }
+    &.border-blue { border-left: 5px solid $blue-logistica; } 
+
+    .kpi-label {
+        display: block;
+        font-weight: bold;
+        color: #555;
+        font-size: 0.9rem;
+    }
+    .kpi-value {
+        font-size: 1.8rem;
+        color: $verde-logistica;
+        font-weight: bold;
+    }
+}
+
+canvas {
+    max-width: 100%;
+}

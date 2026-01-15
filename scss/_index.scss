@@ -1,0 +1,49 @@
+// Estilos para la tabla principal de carga
+.tabla-logistica {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+
+    thead th {
+        background-color: $header-bg;
+        color: $header-text;
+        padding: 10px;
+        border: 1px solid $border-color;
+        font-size: 13px;
+        text-transform: uppercase;
+    }
+
+    tbody td {
+        padding: 8px;
+        border: 1px solid $border-color;
+        background-color: $cell-bg; 
+        font-size: 13px;
+        text-align: center;
+        height: 30px; 
+    }
+
+    input, select {
+        width: 95%;
+        border: 1px solid #ccc;
+        padding: 4px;
+        font-family: inherit;
+        background-color: white;
+    }
+}
+
+.acciones-botones {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-limpiar {
+    background-color: $danger-red;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s;
+    &:hover { background-color: #a71d2a; }
+}
