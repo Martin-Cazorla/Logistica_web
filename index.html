@@ -8,7 +8,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script> 
 </head>
 <body>  
-    <h1>Panel de Carga Diaria - Envíos</h1>
+    <header class="header-principal">
+        <h1>Panel de Carga Diaria - Envíos</h1>
+        <button id="btn-logout" class="btn-logout-top">CERRAR SESIÓN</button>
+    </header>
 
     <div class="resumen-container">
         <div class="kpi-card">
@@ -22,8 +25,7 @@
         <div class="acciones-botones">
             <a href="pages/historial.html" class="btn-historial">VER HISTORIAL</a>
             <button class="btn-excel" id="btn-exportar">DESCARGAR EXCEL</button>
-            <button class="btn-limpiar" id="btn-archivar">ARCHIVAR Y LIMPIAR</button>
-            <button id="btn-logout" style="background-color: #dc3545; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">CERRAR SESIÓN</button>
+            <button class="btn-limpiar" id="btn-archivar">ARCHIVAR Y LIMPIAR</button> 
         </div>
     </div>
 

@@ -1,41 +1,130 @@
-// Estilos para la tabla principal de carga
+// ==========================================
+// SECCIÓN SUPERIOR: HEADER Y LOGOUT
+// ==========================================
+.header-principal {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative; 
+    margin-bottom: 30px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+
+    h1 {
+        margin: 0;
+        background-color: transparent; 
+        box-shadow: none;
+        // Hereda el color $verde-logistica definido en _base.scss
+    }
+}
+
+.btn-logout-top {
+    position: absolute;
+    right: 20px;
+    background-color: $color-logout; // Variable definida en _base.scss
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 12px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+
+    &:hover {
+        background-color: $color-logout-hover;
+        transform: scale(1.05);
+    }
+}
+
+// ==========================================
+// RESUMEN OPERATIVO: KPIs Y ACCIONES
+// ==========================================
+.resumen-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.kpi-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 150px;
+
+    .kpi-label {
+        font-size: 11px;
+        font-weight: bold;
+        color: $gray-dark;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+    }
+
+    .kpi-value {
+        font-size: 28px;
+        font-weight: bold;
+        color: $verde-logistica;
+    }
+}
+
+.acciones-botones {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+// ==========================================
+// TABLA PRINCIPAL DE GESTIÓN (E-COMMERCE)
+// ==========================================
 .tabla-logistica {
     width: 100%;
     border-collapse: collapse;
-    background-color: white;
+    background-color: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    border-radius: 8px;
+    overflow: hidden;
 
     thead th {
         background-color: $header-bg;
         color: $header-text;
-        padding: 10px;
+        padding: 12px;
         border: 1px solid $border-color;
         font-size: 13px;
         text-transform: uppercase;
     }
 
     tbody td {
-        padding: 8px;
+        padding: 10px;
         border: 1px solid $border-color;
-        background-color: $cell-bg; 
+        background-color: rgba(232, 240, 254, 0.6); 
         font-size: 13px;
         text-align: center;
-        height: 30px; 
+        height: 35px; 
     }
 
     input, select {
-        width: 95%;
+        width: 90%;
         border: 1px solid #ccc;
-        padding: 4px;
+        padding: 6px;
+        border-radius: 4px;
         font-family: inherit;
         background-color: white;
     }
 }
 
-.acciones-botones {
-    display: flex;
-    gap: 10px;
-}
-
+// ==========================================
+// BOTONES ESPECÍFICOS
+// ==========================================
 .btn-limpiar {
     background-color: $danger-red;
     color: white;

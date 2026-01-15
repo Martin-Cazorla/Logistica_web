@@ -1,7 +1,12 @@
 body {
   font-family: "Segoe UI", Arial, sans-serif;
-  background-color: #f0f4f1;
+  background-image: linear-gradient(rgba(240, 244, 241, 0.8), rgba(240, 244, 241, 0.8)), url("../img/bg-index.png");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  margin: 0;
   padding: 20px;
+  min-height: 100vh;
 }
 
 h1 {
@@ -9,6 +14,11 @@ h1 {
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 1px;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
 }
 
 .btn-historial {
@@ -35,7 +45,6 @@ h1 {
   border-radius: 4px;
   cursor: pointer;
   font-weight: bold;
-  margin-right: 10px;
   transition: background 0.3s;
 }
 .btn-excel:hover {
@@ -60,43 +69,116 @@ h1 {
   color: white;
   width: 100%;
   padding: 12px;
-  border: none; 
-  cursor: pointer; 
+  border: none;
+  cursor: pointer;
   font-weight: bold;
-} 
+}
+
+.header-principal {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  margin-bottom: 30px;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+.header-principal h1 {
+  margin: 0;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.btn-logout-top {
+  position: absolute;
+  right: 20px;
+  background-color: #2a5a5a;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 12px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+}
+.btn-logout-top:hover {
+  background-color: #1f4444;
+  transform: scale(1.05);
+}
+
+.resumen-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.kpi-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 150px;
+}
+.kpi-card .kpi-label {
+  font-size: 11px;
+  font-weight: bold;
+  color: #4a4a4a;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+.kpi-card .kpi-value {
+  font-size: 28px;
+  font-weight: bold;
+  color: #2d7a44;
+}
+
+.acciones-botones {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
 
 .tabla-logistica {
   width: 100%;
   border-collapse: collapse;
-  background-color: white;
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  overflow: hidden;
 }
 .tabla-logistica thead th {
   background-color: #000000;
   color: #ffffff;
-  padding: 10px;
+  padding: 12px;
   border: 1px solid #999999;
   font-size: 13px;
   text-transform: uppercase;
 }
 .tabla-logistica tbody td {
-  padding: 8px;
+  padding: 10px;
   border: 1px solid #999999;
-  background-color: #e8f0fe;
+  background-color: rgba(232, 240, 254, 0.6);
   font-size: 13px;
   text-align: center;
-  height: 30px;  
-}     
+  height: 35px;
+}
 .tabla-logistica input, .tabla-logistica select {
-  width: 95%;
+  width: 90%;
   border: 1px solid #ccc;
-  padding: 4px;
+  padding: 6px;
+  border-radius: 4px;
   font-family: inherit;
   background-color: white;
-}
-
-.acciones-botones {
-  display: flex;
-  gap: 10px;
 }
 
 .btn-limpiar {
@@ -150,12 +232,12 @@ h1 {
   padding: 20px;
 }
 .modal-content {
-  background-color: white;      
-  border-radius: 8px;  
+  background-color: white;
+  border-radius: 8px;
   width: 100%;
-  max-width: 400px;          
-  animation: animarsuperior 0.3s ease-out;   
-  overflow: hidden;     
+  max-width: 400px;
+  animation: animarsuperior 0.3s ease-out;
+  overflow: hidden;
 }
 .modal-header {
   background-color: #2d7a44;
@@ -163,25 +245,25 @@ h1 {
   padding: 15px;
 }
 .modal-header h3 {
-  margin: 0;       
+  margin: 0;
   text-align: center;
 }
 .modal-body {
-  padding: 20px;    
-}     
+  padding: 20px;
+}
 .modal-body .form-group {
   margin-bottom: 15px;
 }
 .modal-body .form-group label {
-  display: block;  
-  font-weight: bold;   
+  display: block;
+  font-weight: bold;
   margin-bottom: 5px;
 }
 .modal-body .form-group input, .modal-body .form-group select {
   width: 100%;
   padding: 8px;
   border: 1px solid #ccc;
-  border-radius: 4px;     
+  border-radius: 4px;
 }
 .modal-footer {
   padding: 15px;

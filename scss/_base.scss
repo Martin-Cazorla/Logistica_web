@@ -12,13 +12,24 @@ $gray-dark: #4a4a4a;
 $warning-yellow: #ffc107; 
 $blue-logistica: #007bff; 
 
+// Variables para el botón de Cerrar Sesión (Armónicas con el fondo)
+$color-logout: #2a5a5a; 
+$color-logout-hover: #1f4444;
+
 // ==========================================
 // Estilos Globales
 // ==========================================
 body {
     font-family: 'Segoe UI', Arial, sans-serif;
-    background-color: #f0f4f1; 
+    // Overlay de color claro para que el texto resalte sobre la Imagen 4
+    background-image: linear-gradient(rgba(240, 244, 241, 0.8), rgba(240, 244, 241, 0.8)), 
+                      url('../img/bg-index.png'); 
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    margin: 0;
     padding: 20px;
+    min-height: 100vh;
 }
 
 h1 {
@@ -26,6 +37,11 @@ h1 {
     text-align: center;
     text-transform: uppercase;
     letter-spacing: 1px;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
 }
 
 // Botones compartidos
@@ -50,8 +66,7 @@ h1 {
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-weight: bold;
-    margin-right: 10px;
+    font-weight: bold; 
     transition: background 0.3s;
     &:hover { background-color: #144e2e; }
 }
