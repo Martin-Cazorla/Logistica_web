@@ -16,6 +16,47 @@ $color-logout: #2a5a5a;
 $color-logout-hover: #1f4444;
 
 // ==========================================
+// ESTILOS DE LA BARRA DE NAVEGACIÓN (NAVBAR)
+// ==========================================
+.navbar {
+    background-color: $header-bg;
+    border-radius: 0 0 8px 8px; 
+    margin-top: 10px;
+
+    ul {
+        list-style: none;
+        display: flex;
+        margin: 0;
+        padding: 0;
+        justify-content: center;
+    }
+
+    li {
+        margin: 0;
+    }
+
+    a {
+        display: block;
+        color: white;
+        text-decoration: none;
+        padding: 12px 25px;
+        font-weight: bold;
+        font-size: 14px;
+        transition: background 0.3s;
+        text-transform: uppercase;
+
+        &:hover {
+            background-color: lighten($header-bg, 20%);
+        }
+
+        &.active {
+            background-color: $verde-logistica;
+            border-bottom: 3px solid white;
+        }
+    }
+}
+
+// ==========================================
 // Estilos Globales
 // ==========================================
 body {

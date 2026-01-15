@@ -6,9 +6,21 @@
     <title>Historial de Logística - E-commerce</title>
     <link rel="stylesheet" href="../css/styles.css">
 </head>  
+
 <body class="historial-body">
 
-    <h1>HISTORIAL DE CARGAS ARCHIVADAS</h1>
+    <header class="header-principal">
+        <div class="header-top">
+            <h1>HISTORIAL DE CARGAS ARCHIVADAS</h1>
+            </div>
+        <nav class="navbar">
+            <ul>
+                <li><a href="../index.html">PANEL DE CARGA</a></li>
+                <li><a href="indicadores.html">INDICADORES</a></li>
+                <li><a href="historial.html" class="active">HISTORIAL</a></li>
+            </ul>
+        </nav>
+    </header>
 
     <div class="resumen-container">
         <div class="filtros-container">
@@ -27,9 +39,7 @@
             <span id="total-registros" class="kpi-value">0</span>
         </div>
 
-        <div class="acciones-botones">
-            <a href="../pages/indicadores.html" class="btn-excel" style="text-decoration: none; background-color: #007bff;">VER INDICADORES</a>
-            <a href="../index.html" class="btn-historial" style="text-decoration: none;">VOLVER AL PANEL</a>
+        <div class="acciones-botones">   
             <button class="btn-excel" id="btn-limpiar-filtros" style="background-color: #6c757d;">LIMPIAR FILTROS</button>
             <button class="btn-excel" id="btn-descargar-excel">DESCARGAR EXCEL</button>
             <button class="btn-limpiar" id="btn-borrar-todo">BORRAR TODO</button>
@@ -94,8 +104,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    
-    <script type="module">
+    <script type="module">  
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs, deleteDoc, doc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -113,24 +122,21 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-
-        // Bloque de seguridad y carga de datos
+  
         onAuthStateChanged(auth, (user) => {
-            if (user) {
-                console.log("Sesión activa:", user.email);
+            if (user) {  
                 window.db = db;
                 window.firestoreLib = { collection, getDocs, deleteDoc, doc, updateDoc, query, orderBy };
-                      
-                if (typeof window.cargarHistorialDesdeFirebase === "function") {
+                if (typeof window.cargarHistorialDesdeFirebase === "function") {  
                     window.cargarHistorialDesdeFirebase();
                 }
             } else {
                 window.location.href = "../login.html";
             }
         });
-    </script>
-
+    </script>   
     <script src="../config.js"></script>
     <script type="module" src="../historial.js"></script>
 </body>
+
 </html>

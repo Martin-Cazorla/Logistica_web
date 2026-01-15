@@ -3,13 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Logística E-commerce</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script> 
+    <title>Panel de Carga Diaria - Envíos</title>
+    <link rel="stylesheet" href="css/styles.css">  
 </head>
-<body class="index-body">   <header class="header-principal">
-        <h1>Panel de Carga Diaria - Envíos</h1>
-        <button id="btn-logout" class="btn-logout-top">CERRAR SESIÓN</button>
+
+<body class="index-body">
+    <header class="header-principal">
+        <div class="header-top">
+            <h1>Panel de Carga Diaria - Envíos</h1>
+            <button id="btn-logout" class="btn-logout-top">CERRAR SESIÓN</button>
+        </div>
+        <nav class="navbar">
+            <ul>
+                <li><a href="index.html" class="active">PANEL DE CARGA</a></li>
+                <li><a href="pages/indicadores.html">INDICADORES</a></li>
+                <li><a href="pages/historial.html">HISTORIAL</a></li>
+            </ul>
+        </nav>
     </header>
 
     <div class="resumen-container">
@@ -20,9 +30,8 @@
         <div class="kpi-card">
             <span class="kpi-label">TOTAL EXTRAS</span>
             <span id="contador-extras" class="kpi-value">0</span>
-        </div>
-        <div class="acciones-botones">
-            <a href="pages/historial.html" class="btn-historial">VER HISTORIAL</a>
+        </div>   
+        <div class="acciones-botones">   
             <button class="btn-excel" id="btn-exportar">DESCARGAR EXCEL</button>
             <button class="btn-limpiar" id="btn-archivar">ARCHIVAR Y LIMPIAR</button> 
         </div>
@@ -43,8 +52,7 @@
                 <th>Acción</th>
             </tr>
         </thead>
-        <tbody id="tabla-body">
-        </tbody>
+        <tbody id="tabla-body"></tbody>
     </table>
 
     <script type="module">    
@@ -85,4 +93,5 @@
         };
     </script>   
 </body>
+
 </html>

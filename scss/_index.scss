@@ -8,23 +8,31 @@
 }
 
 // ==========================================
-// SECCIÓN SUPERIOR: HEADER Y LOGOUT
+// SECCIÓN SUPERIOR: HEADER REESTRUCTURADO
 // ==========================================
 .header-principal {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative; 
+    flex-direction: column; // Título arriba, nav abajo
     margin-bottom: 30px;
-    background-color: rgba(255, 255, 255, 0.8);
-    border-radius: 10px;
-    padding: 10px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    overflow: hidden; // Para que la navbar respete el redondeado
 
-    h1 {
-        margin: 0;
-        background-color: transparent; 
-        box-shadow: none;    
+    .header-top {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        padding: 20px;
+
+        h1 {
+            margin: 0;
+            padding: 0;
+            box-shadow: none;
+            background: transparent;
+            font-size: 24px;
+        }
     }
 }
 
@@ -49,7 +57,7 @@
 }
 
 // ==========================================
-// RESUMEN OPERATIVO: KPIs Y ACCIONES
+// RESUMEN OPERATIVO
 // ==========================================
 .resumen-container {
     display: flex;

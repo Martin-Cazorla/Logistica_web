@@ -7,7 +7,21 @@
     <link rel="stylesheet" href="../css/styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="indicadores-body"> <h1>DASHBOARD DE RENDIMIENTO</h1>
+
+<body class="indicadores-body">
+    
+    <header class="header-principal">
+        <div class="header-top">
+            <h1>DASHBOARD DE RENDIMIENTO</h1>
+        </div>
+        <nav class="navbar">
+            <ul>
+                <li><a href="../index.html">PANEL DE CARGA</a></li>
+                <li><a href="indicadores.html" class="active">INDICADORES</a></li>
+                <li><a href="historial.html">HISTORIAL</a></li>
+            </ul>
+        </nav>
+    </header>
 
     <div class="resumen-container">
         <div class="filtro-grupo-dashboard">
@@ -22,21 +36,15 @@
         <div class="kpi-card border-blue">
             <span class="kpi-label">UNIDADES EN PERIODO</span>
             <span id="kpi-unidades" class="kpi-value">0</span>
-        </div>
-
+        </div>  
         <div class="kpi-card border-green">
             <span class="kpi-label">PRODUCTIVIDAD x UNIDAD</span>
             <span id="kpi-productividad" class="kpi-value">0.00</span>
-        </div>
-        
+        </div>  
         <div class="kpi-card border-yellow">
             <span class="kpi-label">RATIO DE EXTRAS</span>
             <span id="kpi-extras" class="kpi-value">0%</span>
-        </div>
-
-        <div class="acciones-botones">
-            <a href="../index.html" class="btn-historial" style="text-decoration: none;">VOLVER AL PANEL</a>
-        </div>
+        </div>  
     </div>
 
     <div class="resumen-container dashboard-grafico">
@@ -65,8 +73,7 @@
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 window.db = db;
-                window.firestoreLib = { collection, getDocs, query };
-                
+                window.firestoreLib = { collection, getDocs, query };  
                 if (typeof window.obtenerDatos === "function") {
                     window.obtenerDatos();
                 }
@@ -74,9 +81,9 @@
                 window.location.href = "../login.html";
             }
         });
-    </script>
-
+    </script>  
     <script src="../config.js"></script>
     <script type="module" src="../indicadores.js"></script>
 </body>
+
 </html>
