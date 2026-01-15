@@ -22,8 +22,7 @@ window.cargarHistorialDesdeFirebase = async function() {
         querySnapshot.forEach(doc => {
             datosGlobales.push({ idFirebase: doc.id, ...doc.data() });
         });
-
-        // Ordenamos: Lo más nuevo primero para ver el rendimiento reciente
+        
         datosGlobales.sort((a, b) => convertirFechaParaOrdenar(b.fecha) - convertirFechaParaOrdenar(a.fecha));
         renderizarTablaHistorial(datosGlobales);
         console.log("Historial cargado correctamente desde Firebase.");
@@ -125,11 +124,11 @@ const guardarCambios = async () => {
 // --- ASIGNACIÓN DE EVENTOS ---
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Escuchar filtros
+
     document.getElementById("filtro-fecha").addEventListener("input", ejecutarFiltros);
     document.getElementById("filtro-unidad").addEventListener("input", ejecutarFiltros);
+
     
-    // Botones de acción
     document.getElementById("btn-limpiar-filtros").onclick = () => {
         document.getElementById("filtro-fecha").value = "";
         document.getElementById("filtro-unidad").value = "";

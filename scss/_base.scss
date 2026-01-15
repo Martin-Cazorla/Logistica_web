@@ -63,11 +63,10 @@ body {
     font-family: 'Segoe UI', Arial, sans-serif;
     margin: 0;
     padding: 20px;
-    min-height: 100vh;
-    // Quitamos las líneas de background-image para definirlas por página
+    min-height: 100vh;     
 }
 
-// Estilo común para todos los fondos (Para no repetir código)
+// Estilo común para todos los fondos 
 .bg-config {
     background-size: cover;
     background-position: center;

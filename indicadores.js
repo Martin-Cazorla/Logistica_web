@@ -3,7 +3,7 @@ let datosGlobales = [];
 let chartInstance = null;
 
 // --- CARGA DE DATOS ---
-// La hacemos global para que el HTML la dispare al verificar el usuario
+
 window.obtenerDatos = async function() {
     if (!window.firestoreLib || !window.db) return;
 
@@ -38,7 +38,7 @@ function actualizarDashboard(datos) {
     document.getElementById('kpi-productividad').innerText = totalUnidades > 0 ? (totalVueltas / totalUnidades).toFixed(2) : "0.00";
     document.getElementById('kpi-extras').innerText = totalUnidades > 0 ? ((totalExtras / totalUnidades) * 100).toFixed(0) + "%" : "0%";
     
-    // Preparar datos para el gráfico por fecha
+    // Datos para el gráfico por fecha
     const statsPorDia = {};
     datos.forEach(reg => {
         const f = reg.fecha;
@@ -107,7 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const [y, m, d] = f.split("-");
         const fechaConCero = `${d}/${m}/${y}`; 
         const fechaSinCero = `${parseInt(d)}/${parseInt(m)}/${y}`;
-          
+        
         const filtrados = datosGlobales.filter(reg => {
             const valorFecha = String(reg.fecha || "").trim();
             return valorFecha === fechaConCero || valorFecha === fechaSinCero;

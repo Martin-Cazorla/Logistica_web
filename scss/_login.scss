@@ -3,7 +3,7 @@
 .login-body {
     @extend .bg-config; 
     background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
-                      url('../img/bg-login.png');
+                    url('../img/bg-login.png');
     display: flex;
     align-items: center;
     justify-content: center;

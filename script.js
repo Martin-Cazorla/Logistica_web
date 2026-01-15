@@ -61,7 +61,7 @@ function agregarFilaVacia() {
         if (unidadEncontrada) {
             fila.querySelector('.res-modelo').innerText = unidadEncontrada.modelo;
             fila.querySelector('.res-tamano').innerText = unidadEncontrada.tamaño;
-            fila.querySelector('.res-chofer').innerText = unidadEncontrada.chofer; // Ahora es innerText
+            fila.querySelector('.res-chofer').innerText = unidadEncontrada.chofer; 
             inputID.style.backgroundColor = "#d4edda"; 
         } else {
             fila.querySelector('.res-modelo').innerText = "-";
@@ -142,7 +142,7 @@ document.getElementById('btn-archivar').onclick = async () => {
                 fecha: fechaActual,
                 horario: fila.querySelector('.input-horario').value,
                 unidad: fila.querySelector('.input-id-unidad').value,
-                chofer: fila.querySelector('.res-chofer').innerText, // Extraemos de la celda de texto
+                chofer: fila.querySelector('.res-chofer').innerText, 
                 vueltas: fila.querySelector('.input-vueltas').value,
                 extra: fila.querySelector('.input-extra').value,
                 obs: fila.querySelector('.input-obs').value

@@ -3,9 +3,9 @@
 // ==========================================
 .indicadores-body {
     @extend .bg-config;
-    // Overlay ligeramente verdoso para alinearlo con la identidad visual
+
     background-image: linear-gradient(rgba(240, 248, 240, 0.85), rgba(240, 248, 240, 0.85)), 
-                      url('../img/bg-indicadores.png');
+                    url('../img/bg-indicadores.png');
 }
 
 // ==========================================
@@ -55,7 +55,7 @@
     &.dashboard-grafico {
         padding: 30px;
         background-color: rgba(255, 255, 255, 0.95);
-        display: block; // Para que el canvas ocupe su lugar correctamente
+        display: block; 
     }
 }
 
