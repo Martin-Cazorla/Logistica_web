@@ -1,4 +1,13 @@
 // ==========================================
+// FONDO ESPECÍFICO DE INDEX
+// ==========================================
+.index-body {
+    @extend .bg-config; 
+    background-image: linear-gradient(rgba(240, 244, 241, 0.8), rgba(240, 244, 241, 0.8)), 
+                      url('../img/bg-index.png'); 
+}
+
+// ==========================================
 // SECCIÓN SUPERIOR: HEADER Y LOGOUT
 // ==========================================
 .header-principal {
@@ -15,15 +24,14 @@
     h1 {
         margin: 0;
         background-color: transparent; 
-        box-shadow: none;
-        // Hereda el color $verde-logistica definido en _base.scss
+        box-shadow: none;    
     }
 }
 
 .btn-logout-top {
     position: absolute;
     right: 20px;
-    background-color: $color-logout; // Variable definida en _base.scss
+    background-color: $color-logout; 
     color: white;
     border: none;
     padding: 8px 15px;

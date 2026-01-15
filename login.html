@@ -48,8 +48,7 @@
             const pass = document.getElementById('login-pass').value;
             const errorMsg = document.getElementById('login-error');
 
-            try {
-            // Forzamos que la sesión se guarde en el navegador
+            try {  
                 await setPersistence(auth, browserLocalPersistence);
             
                 const userCredential = await signInWithEmailAndPassword(auth, email, pass);

@@ -1,10 +1,10 @@
-// script.js - CARGA CONTINUA POR TECLA ENTER
+// script.js - PANEL DE CONTROL LOGÍSTICO (E-COMMERCE)
 import { unidadesData } from './config.js';
 
 const tbody = document.getElementById("tabla-body");
 const fechaActual = new Date().toLocaleDateString('es-AR');
 
-// 1. Función para crear la fila con detección de Enter
+// 1. Función para crear la fila
 function agregarFilaVacia() {
     const fila = document.createElement("tr");
     
@@ -16,6 +16,7 @@ function agregarFilaVacia() {
                 <option value="11:00hs">11:00hs</option>
                 <option value="Electro">Electro</option>
                 <option value="Agregado">Agregado</option>
+                <option value="No se presenta">No se presenta</option>
             </select>
         </td>
         <td>
@@ -23,9 +24,7 @@ function agregarFilaVacia() {
         </td>
         <td class="res-modelo" style="color: #666;">-</td>
         <td class="res-tamano" style="color: #666;">-</td>
-        <td class="res-chofer">
-            <input type="text" class="input-chofer" placeholder="Chofer...">
-        </td>
+        <td class="res-chofer" style="color: #333;">-</td>
         <td>
             <select class="input-vueltas">
                 <option value="1">1</option>
@@ -35,7 +34,7 @@ function agregarFilaVacia() {
             </select>
         </td>
         <td>
-            <select class="input-extra" onchange="actualizarContadores()">
+            <select class="input-extra">
                 <option value="0">0</option>
                 <option value="1">1</option>
             </select>
@@ -47,8 +46,14 @@ function agregarFilaVacia() {
     `;
 
     const inputID = fila.querySelector('.input-id-unidad');
+    const selectHorario = fila.querySelector('.input-horario');
+    const selectExtra = fila.querySelector('.input-extra');
     
-    // ESCUCHA DE DATOS (Búsqueda automática)
+    // Escuchadores para actualización inmediata de contadores
+    selectHorario.addEventListener('change', actualizarContadores);
+    selectExtra.addEventListener('change', actualizarContadores);
+
+    // Búsqueda automática en config.js
     inputID.addEventListener('input', (e) => {
         const idIngresado = e.target.value.trim();
         const unidadEncontrada = unidadesData.find(u => u.id === idIngresado);
@@ -56,23 +61,23 @@ function agregarFilaVacia() {
         if (unidadEncontrada) {
             fila.querySelector('.res-modelo').innerText = unidadEncontrada.modelo;
             fila.querySelector('.res-tamano').innerText = unidadEncontrada.tamaño;
-            fila.querySelector('.input-chofer').value = unidadEncontrada.chofer;
+            fila.querySelector('.res-chofer').innerText = unidadEncontrada.chofer; // Ahora es innerText
             inputID.style.backgroundColor = "#d4edda"; 
         } else {
             fila.querySelector('.res-modelo').innerText = "-";
             fila.querySelector('.res-tamano').innerText = "-";
-            fila.querySelector('.input-chofer').value = "";
+            fila.querySelector('.res-chofer').innerText = "-";
             inputID.style.backgroundColor = ""; 
         }
         actualizarContadores();
     });
 
-    // --- EL TRUCO DEL ENTER ---
+    // Carga continua por tecla Enter
     inputID.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
-            e.preventDefault(); // Evita comportamientos raros
+            e.preventDefault(); 
             if (inputID.value.trim() !== "") {
-                agregarFilaVacia(); // Crea la siguiente fila automáticamente
+                agregarFilaVacia(); 
             }
         }
     });
@@ -81,27 +86,51 @@ function agregarFilaVacia() {
     inputID.focus(); 
 }
 
-// 2. Iniciar con una fila apenas abre la app
+// 2. Iniciar con una fila limpia
 agregarFilaVacia();
 actualizarContadores();
 
-// 3. KPI y Archivar 
-window.actualizarContadores = () => {
+// 3. Lógica de Indicadores (KPIs) - REFORZADA
+function actualizarContadores() {
     const filas = document.querySelectorAll('#tabla-body tr');
-    document.getElementById('contador-unidades').innerText = filas.length;
-
+    let unidadesContadas = 0;
     let totalExtras = 0;
-    filas.forEach(fila => {
-        totalExtras += parseInt(fila.querySelector('.input-extra').value) || 0;
-    });
-    document.getElementById('contador-extras').innerText = totalExtras;
-};
 
+    filas.forEach(fila => {
+        const inputID = fila.querySelector('.input-id-unidad');
+        const selectHorario = fila.querySelector('.input-horario');
+        const selectExtra = fila.querySelector('.input-extra');
+
+        if (inputID && selectHorario) {
+            const idValue = inputID.value.trim();
+            const horarioValue = selectHorario.value;
+
+            // Contar unidad: debe tener ID y no ser "No se presenta"
+            if (idValue !== "" && horarioValue !== "No se presenta") {
+                unidadesContadas++;
+            }
+        }
+
+        if (selectExtra) {
+            totalExtras += parseInt(selectExtra.value) || 0;
+        }
+    });
+
+    // Actualización del DOM
+    const kpiUnidades = document.getElementById('contador-unidades');
+    const kpiExtras = document.getElementById('contador-extras');
+
+    if (kpiUnidades) kpiUnidades.innerText = unidadesContadas;
+    if (kpiExtras) kpiExtras.innerText = totalExtras;
+}
+
+// Hacer la función accesible globalmente para el botón de borrar (X)
+window.actualizarContadores = actualizarContadores;
+
+// 4. Archivar datos en Firebase
 document.getElementById('btn-archivar').onclick = async () => {
     const { collection, addDoc } = window.firestoreLib;
-    const filas = tbody.querySelectorAll('tr');
-    
-    // Filtrar filas vacías antes de guardar
+    const filas = tbody.querySelectorAll('tr');  
     const filasConDatos = Array.from(filas).filter(f => f.querySelector('.input-id-unidad').value !== "");
 
     if (filasConDatos.length === 0) return alert("No hay unidades para archivar.");
@@ -113,19 +142,19 @@ document.getElementById('btn-archivar').onclick = async () => {
                 fecha: fechaActual,
                 horario: fila.querySelector('.input-horario').value,
                 unidad: fila.querySelector('.input-id-unidad').value,
-                chofer: fila.querySelector('.input-chofer').value,
+                chofer: fila.querySelector('.res-chofer').innerText, // Extraemos de la celda de texto
                 vueltas: fila.querySelector('.input-vueltas').value,
                 extra: fila.querySelector('.input-extra').value,
                 obs: fila.querySelector('.input-obs').value
             };
             await addDoc(collection(window.db, "historialLogistica"), data);
         }
-        alert("¡Todo guardado correctamente!");
+        alert("¡Datos archivados correctamente!");
         tbody.innerHTML = ""; 
-        agregarFilaVacia(); // Reiniciar con una fila limpia
+        agregarFilaVacia(); 
         actualizarContadores();
     } catch (error) {
-        console.error("Error:", error);
-        alert("Error al guardar.");
+        console.error("Error al archivar:", error);
+        alert("Error al guardar en la base de datos.");
     }
 };

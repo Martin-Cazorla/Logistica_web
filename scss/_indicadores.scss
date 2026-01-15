@@ -1,3 +1,16 @@
+// ==========================================
+// FONDO ESPECÍFICO DE INDICADORES
+// ==========================================
+.indicadores-body {
+    @extend .bg-config;
+    // Overlay ligeramente verdoso para alinearlo con la identidad visual
+    background-image: linear-gradient(rgba(240, 248, 240, 0.85), rgba(240, 248, 240, 0.85)), 
+                      url('../img/bg-indicadores.png');
+}
+
+// ==========================================
+// ESTILOS DE DASHBOARD
+// ==========================================
 .resumen-container {
     display: flex;
     justify-content: space-around;
@@ -7,12 +20,22 @@
     margin-bottom: 20px;
     border-radius: 8px;
     border-top: 5px solid $verde-logistica; 
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+
+    &.dashboard-grafico {
+        padding: 30px;
+        background-color: rgba(255, 255, 255, 0.95);
+    }
 }
 
 .kpi-card {
     text-align: center;
     padding: 10px 20px;
+    transition: transform 0.2s;
+
+    &:hover {
+        transform: translateY(-5px);
+    }
 
     &.border-green { border-left: 5px solid $verde-logistica; }
     &.border-yellow { border-left: 5px solid $warning-yellow; }
@@ -21,13 +44,34 @@
     .kpi-label {
         display: block;
         font-weight: bold;
-        color: #555;
+        color: $gray-dark;
         font-size: 0.9rem;
+        text-transform: uppercase;
+        margin-bottom: 5px;
     }
     .kpi-value {
-        font-size: 1.8rem;
+        font-size: 2rem;
         color: $verde-logistica;
         font-weight: bold;
+    }
+}
+
+.filtro-grupo-dashboard {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    
+    label {
+        font-weight: bold;
+        font-size: 0.85rem;
+        color: $gray-dark;
+    }
+
+    input.input-calendario {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-family: inherit;
     }
 }
 

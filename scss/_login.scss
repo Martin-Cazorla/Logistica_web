@@ -1,18 +1,50 @@
 // Estilos específicos para la pantalla de inicio de sesión
+
+.login-body {
+    @extend .bg-config; 
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                      url('../img/bg-login.png');
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .login-container {
     max-width: 400px;
-    margin: 100px auto;
+    margin: 0; 
     background: white;
     padding: 40px;
     border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
     
-    input {
-        width: 100%;
-        margin-bottom: 20px;
-        padding: 10px;
+    h2 {
+        color: #2d7a44; 
+        text-align: center;
+        margin-top: 0;
     }
 
+    p {
+        text-align: center;
+        color: #666;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+    }
+
+    input {
+        width: 100%;
+        margin-bottom: 10px;
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box; 
+    }
     .btn-ingresar {
         background-color: $verde-logistica;
         color: white;
@@ -23,3 +55,4 @@
         font-weight: bold;
     }
 }
+
