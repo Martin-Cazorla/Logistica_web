@@ -1,4 +1,4 @@
-// script.js - PANEL DE CONTROL LOGÍSTICO (E-COMMERCE)
+// script.js - PANEL DE CONTROL LOGÍSTICO 
 import { unidadesData } from './config.js';
 
 const tbody = document.getElementById("tabla-body");
@@ -6,16 +6,16 @@ const inputFechaControl = document.getElementById("fecha-operacion");
 
 // --- CONFIGURACIÓN INICIAL DE FECHA ---
 const hoy = new Date();
-// Ajuste de formato para el input type="date" (YYYY-MM-DD)
+
 const fechaISO = hoy.toISOString().split('T')[0]; 
 if (inputFechaControl) {
     inputFechaControl.value = fechaISO;
 }
 
-// Función para obtener la fecha del selector en formato legible (DD/MM/YYYY)
+// Función para obtener la fecha del selector en formato legible 
 function obtenerFechaSeleccionada() {
     if (!inputFechaControl.value) return new Date().toLocaleDateString('es-AR');
-    // Agregamos T00:00:00 para evitar que el desfasaje horario reste un día
+
     const fecha = new Date(inputFechaControl.value + 'T00:00:00'); 
     return fecha.toLocaleDateString('es-AR');
 }
@@ -69,7 +69,7 @@ function agregarFilaVacia() {
     selectHorario.addEventListener('change', actualizarContadores);
     selectExtra.addEventListener('change', actualizarContadores);
 
-    // Búsqueda automática en config.js (Lógica del código viejo integrada)
+    // Búsqueda automática en config.js 
     inputID.addEventListener('input', (e) => {
         const idIngresado = e.target.value.trim();
         const unidadEncontrada = unidadesData.find(u => u.id === idIngresado);
@@ -116,8 +116,7 @@ function actualizarContadores() {
         if (inputID && selectHorario) {
             const idValue = inputID.value.trim();
             const horarioValue = selectHorario.value;
-
-            // Contar unidad: debe tener ID y no ser "No se presenta"
+        
             if (idValue !== "" && horarioValue !== "No se presenta") {
                 unidadesContadas++;
             }

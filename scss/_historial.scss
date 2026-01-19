@@ -79,6 +79,37 @@
 }
 
 // ==========================================
+// BOTONES DE ACCIÓN EN LA TABLA
+// ==========================================
+.btn-editar {
+    background-color: #ffc107; 
+    color: #212529;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s;
+
+    &:hover {
+        background-color: #e0a800;
+    }
+}
+
+.btn-eliminar {
+    background-color: #dc3545; 
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s;
+
+    &:hover {
+        background-color: #c82333;
+    }
+}
+
+// ==========================================
 // VENTANA MODAL DE EDICIÓN
 // ==========================================
 .modal {

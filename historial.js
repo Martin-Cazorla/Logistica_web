@@ -48,10 +48,27 @@ function renderizarTablaHistorial(lista) {
             <td>${reg.obs}</td>
             <td>
                 <button onclick="window.abrirModalEditar('${reg.idFirebase}')" class="btn-editar">✏️</button>
+                <button onclick="window.eliminarRegistro('${reg.idFirebase}')" class="btn-eliminar">🗑️</button>
             </td>
         </tr>
     `).join('');
 }
+// --- FUNCIÓN GLOBAL PARA ELIMINAR ---
+window.eliminarRegistro = async function(idFirebase) {
+    const { doc, deleteDoc } = window.firestoreLib;
+    
+    if (!confirm("¿Estás seguro de que deseas eliminar este registro de forma permanente?")) return;
+
+    try {
+        await deleteDoc(doc(window.db, "historialLogistica", idFirebase));
+        alert("Registro eliminado con éxito.");
+        
+        window.cargarHistorialDesdeFirebase(); 
+    } catch (e) {
+        console.error("Error al eliminar el documento:", e);
+        alert("Hubo un error al intentar eliminar el registro.");
+    }
+};
 
 // --- FILTROS DE BÚSQUEDA ---
 
