@@ -1,6 +1,7 @@
 // config.js
+
+// 1. Datos de las unidades (se mantienen igual)
 export const unidadesData = [
-    { id: "99", modelo: "Renault Master 2,5 DCL", tamaño: "Grande", chofer: "Carlos Vitale" },
     { id: "591", modelo: "Citroen Jumper", tamaño: "Grande", chofer: "Emanuel Suarez" },
     { id: "130", modelo: "Lifan Foison Box", tamaño: "Grande", chofer: "Maximiliano Ramos" },
     { id: "635", modelo: "Peugeot Boxer 330M 2,3 HDI", tamaño: "Grande", chofer: "Oscar Calcada" },
@@ -28,11 +29,26 @@ export const unidadesData = [
     { id: "985", modelo: "Flete", tamaño: "Chica", chofer: "Flete" },
     { id: "984", modelo: "Flete", tamaño: "Chica", chofer: "Flete" },
     { id: "983", modelo: "Flete", tamaño: "Chica", chofer: "Flete" },
+    { id: "99", modelo: "Mercedes sprinter", tamaño: "Grande", chofer: "Flete" },
     { id: "921", modelo: "Mercedes Sprinter", tamaño: "Grande", chofer: "Luciano" }
 ];
 
-// Ayudante común
-function obtenerFechaHoy() {
+// 2. Ayudante común
+export function obtenerFechaHoy() {
     const hoy = new Date();
     return hoy.toLocaleDateString('es-AR');
+}
+
+// 3. EFECTO NAVBAR FIJA 
+if (typeof window !== 'undefined') {
+    window.addEventListener('scroll', () => {
+        const header = document.querySelector('.header-principal');
+        if (header) {
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        }
+    });
 }

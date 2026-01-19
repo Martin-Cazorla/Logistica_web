@@ -1,7 +1,24 @@
+.header-principal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  transition: all 0.4s ease;
+  background-color: rgb(255, 255, 255);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+.header-principal.scrolled {
+  background-color: rgba(255, 255, 255, 0.75);
+  -webkit-backdrop-filter: blur(8px);
+          backdrop-filter: blur(8px);
+  padding-bottom: 5px;
+}
+
 .navbar {
   background-color: #000000;
-  border-radius: 0 0 8px 8px;
-  margin-top: 10px;
+  border-radius: 0;
+  margin-top: 0;
 }
 .navbar ul {
   list-style: none;
@@ -34,7 +51,7 @@
 body {
   font-family: "Segoe UI", Arial, sans-serif;
   margin: 0;
-  padding: 20px;
+  padding: 180px 20px 20px 20px;
   min-height: 100vh;
 }
 
@@ -50,11 +67,10 @@ h1 {
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 1px;
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: transparent;
   padding: 15px;
-  border-radius: 10px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  margin-bottom: 30px;
+  margin: 0;
+  font-size: 24px;
 }
 
 .btn-historial {
@@ -216,6 +232,21 @@ h1 {
   color: #2d7a44;
 }
 
+.input-fecha-control {
+  border: 1px solid #999999;
+  border-radius: 4px;
+  padding: 5px;
+  font-family: inherit;
+  color: #4a4a4a;
+  background-color: white;
+  cursor: pointer;
+  margin-top: 5px;
+}
+.input-fecha-control:focus {
+  outline: none;
+  border-color: #2d7a44;
+}
+
 .acciones-botones {
   display: flex;
   gap: 12px;
@@ -331,6 +362,32 @@ h1 {
 }
 .filtros-container .filtro-grupo input:focus {
   border-color: #2d7a44;
+}
+
+.btn-editar {
+  background-color: #ffc107;
+  color: #212529;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.btn-editar:hover {
+  background-color: #e0a800;
+}
+
+.btn-eliminar {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.btn-eliminar:hover {
+  background-color: #c82333;
 }
 
 .modal {

@@ -18,10 +18,28 @@ $color-logout-hover: #1f4444;
 // ==========================================
 // ESTILOS DE LA BARRA DE NAVEGACIÓN (NAVBAR)
 // ==========================================
+.header-principal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    transition: all 0.4s ease; 
+    background-color: rgba(255, 255, 255, 1); 
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+
+    // se activa con JavaScript al scrollear
+    &.scrolled {
+        background-color: rgba(255, 255, 255, 0.75); 
+        backdrop-filter: blur(8px); 
+        padding-bottom: 5px;
+    }
+}
+
 .navbar {
     background-color: $header-bg;
-    border-radius: 0 0 8px 8px; 
-    margin-top: 10px;
+    border-radius: 0; 
+    margin-top: 0;
 
     ul {
         list-style: none;
@@ -31,9 +49,7 @@ $color-logout-hover: #1f4444;
         justify-content: center;
     }
 
-    li {
-        margin: 0;
-    }
+    li { margin: 0; }
 
     a {
         display: block;
@@ -62,7 +78,7 @@ $color-logout-hover: #1f4444;
 body {
     font-family: 'Segoe UI', Arial, sans-serif;
     margin: 0;
-    padding: 20px;
+    padding: 180px 20px 20px 20px; 
     min-height: 100vh;     
 }
 
@@ -79,11 +95,10 @@ h1 {
     text-align: center;
     text-transform: uppercase;
     letter-spacing: 1px;
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: transparent;
     padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    margin-bottom: 30px;
+    margin: 0;
+    font-size: 24px;
 }
 
 // Botones compartidos
