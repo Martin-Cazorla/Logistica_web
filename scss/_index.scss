@@ -92,7 +92,21 @@
         color: $verde-logistica;
     }
 }
+.input-fecha-control {
+    border: 1px solid $border-color;
+    border-radius: 4px;
+    padding: 5px;
+    font-family: inherit;
+    color: $gray-dark;
+    background-color: white;
+    cursor: pointer;
+    margin-top: 5px;
 
+    &:focus {
+        outline: none;
+        border-color: $verde-logistica;
+    }
+}
 .acciones-botones {
     display: flex;
     gap: 12px;

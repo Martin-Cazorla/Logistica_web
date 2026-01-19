@@ -24,6 +24,10 @@
 
     <div class="resumen-container">
         <div class="kpi-card">
+            <span class="kpi-label">FECHA DE OPERACIÓN</span>
+            <input type="date" id="fecha-operacion" class="input-fecha-control">
+        </div>
+        <div class="kpi-card">
             <span class="kpi-label">UNIDADES PRESENTES</span>
             <span id="contador-unidades" class="kpi-value">0</span>
         </div>     
@@ -82,7 +86,7 @@
                 window.location.href = "login.html"; 
             } else {
                 import('./script.js').then(() => {
-                console.log("Sistema de carga continua activado");
+                   console.log("Sistema de carga continua activado");
                 }).catch(err => console.error("Error cargando script.js:", err));
             }
         });

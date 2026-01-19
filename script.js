@@ -2,14 +2,30 @@
 import { unidadesData } from './config.js';
 
 const tbody = document.getElementById("tabla-body");
-const fechaActual = new Date().toLocaleDateString('es-AR');
+const inputFechaControl = document.getElementById("fecha-operacion");
 
-// 1. Función para crear la fila
+// --- CONFIGURACIÓN INICIAL DE FECHA ---
+const hoy = new Date();
+// Ajuste de formato para el input type="date" (YYYY-MM-DD)
+const fechaISO = hoy.toISOString().split('T')[0]; 
+if (inputFechaControl) {
+    inputFechaControl.value = fechaISO;
+}
+
+// Función para obtener la fecha del selector en formato legible (DD/MM/YYYY)
+function obtenerFechaSeleccionada() {
+    if (!inputFechaControl.value) return new Date().toLocaleDateString('es-AR');
+    // Agregamos T00:00:00 para evitar que el desfasaje horario reste un día
+    const fecha = new Date(inputFechaControl.value + 'T00:00:00'); 
+    return fecha.toLocaleDateString('es-AR');
+}
+
+// --- 1. FUNCIÓN PARA CREAR LA FILA ---
 function agregarFilaVacia() {
     const fila = document.createElement("tr");
     
     fila.innerHTML = `
-        <td>${fechaActual}</td>
+        <td class="celda-fecha">${obtenerFechaSeleccionada()}</td>
         <td>
             <select class="input-horario">
                 <option value="10:00hs">10:00hs</option>
@@ -53,7 +69,7 @@ function agregarFilaVacia() {
     selectHorario.addEventListener('change', actualizarContadores);
     selectExtra.addEventListener('change', actualizarContadores);
 
-    // Búsqueda automática en config.js
+    // Búsqueda automática en config.js (Lógica del código viejo integrada)
     inputID.addEventListener('input', (e) => {
         const idIngresado = e.target.value.trim();
         const unidadEncontrada = unidadesData.find(u => u.id === idIngresado);
@@ -86,11 +102,7 @@ function agregarFilaVacia() {
     inputID.focus(); 
 }
 
-// 2. Iniciar con una fila limpia
-agregarFilaVacia();
-actualizarContadores();
-
-// 3. Lógica de Indicadores (KPIs) - REFORZADA
+// --- 2. LÓGICA DE INDICADORES (KPIs) ---
 function actualizarContadores() {
     const filas = document.querySelectorAll('#tabla-body tr');
     let unidadesContadas = 0;
@@ -116,7 +128,6 @@ function actualizarContadores() {
         }
     });
 
-    // Actualización del DOM
     const kpiUnidades = document.getElementById('contador-unidades');
     const kpiExtras = document.getElementById('contador-extras');
 
@@ -127,19 +138,29 @@ function actualizarContadores() {
 // Hacer la función accesible globalmente para el botón de borrar (X)
 window.actualizarContadores = actualizarContadores;
 
-// 4. Archivar datos en Firebase
+// --- 3. EVENTOS DE CONTROL DE FECHA ---
+if (inputFechaControl) {
+    inputFechaControl.addEventListener('change', () => {
+        const celdasFecha = document.querySelectorAll('.celda-fecha');
+        celdasFecha.forEach(celda => celda.innerText = obtenerFechaSeleccionada());
+    });
+}
+
+// --- 4. ARCHIVAR DATOS EN FIREBASE ---
 document.getElementById('btn-archivar').onclick = async () => {
     const { collection, addDoc } = window.firestoreLib;
     const filas = tbody.querySelectorAll('tr');  
     const filasConDatos = Array.from(filas).filter(f => f.querySelector('.input-id-unidad').value !== "");
 
     if (filasConDatos.length === 0) return alert("No hay unidades para archivar.");
-    if (!confirm(`¿Archivar las ${filasConDatos.length} unidades registradas?`)) return;
+    
+    const fechaParaGuardar = obtenerFechaSeleccionada();
+    if (!confirm(`¿Archivar las ${filasConDatos.length} unidades registradas con fecha ${fechaParaGuardar}?`)) return;
 
     try {
         for (let fila of filasConDatos) {
             const data = {
-                fecha: fechaActual,
+                fecha: fechaParaGuardar, 
                 horario: fila.querySelector('.input-horario').value,
                 unidad: fila.querySelector('.input-id-unidad').value,
                 chofer: fila.querySelector('.res-chofer').innerText, 
@@ -158,3 +179,7 @@ document.getElementById('btn-archivar').onclick = async () => {
         alert("Error al guardar en la base de datos.");
     }
 };
+
+// --- INICIO DE LA APLICACIÓN ---
+agregarFilaVacia();
+actualizarContadores();
