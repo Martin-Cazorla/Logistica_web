@@ -6,7 +6,8 @@ import {
     guardarRegistro, 
     obtenerRegistrosPorFecha, 
     actualizarRegistro,
-    eliminarRegistro // AGREGADO: Importación faltante que causaba el error
+    eliminarRegistro,
+    obtenerRegistrosActivos // Nueva importación para el cierre
 } from '../firebase/db-operations.js';
 import { obtenerUnidades } from '../data/unidades.js';
 import { mostrarNotificacion } from '../modules/utils.js';
@@ -59,7 +60,7 @@ document.addEventListener('keydown', async (e) => {
                 chofer: unidad.chofer,
                 modelo: unidad.modelo,
                 tamano: unidad.tamaño,
-                horarioIngreso: "10:00hs", // Valor inicial por defecto
+                horarioIngreso: "10:00hs",
                 vueltasTotales: 0,
                 detalleVueltas: [],
                 finalizado: false
@@ -74,7 +75,7 @@ document.addEventListener('keydown', async (e) => {
     }
 });
 
-// --- 3. RENDERIZADO (MODIFICADO PUNTO 1) ---
+// --- 3. RENDERIZADO ---
 
 function renderizarTablaEnVivo(lista) {
     if (!tbody) return;
@@ -123,7 +124,6 @@ function renderizarTablaEnVivo(lista) {
     actualizarContadores(lista);
 }
 
-// Función global para actualizar el horario de ingreso directamente
 window.cambiarHorarioIngreso = async (id, nuevoValor) => {
     try {
         await actualizarRegistro(id, { horarioIngreso: nuevoValor });
@@ -137,14 +137,10 @@ function actualizarContadores(lista) {
     let enRuta = 0;
     let disponibles = 0;
     let totalVueltasDia = 0;
-    
-    // Contadores para bandas horarias
     const bandas = { "10-14": 0, "13-16": 0, "16-19": 0, "19-21": 0 };
 
     lista.forEach(reg => {
         totalVueltasDia += (reg.vueltasTotales || 0);
-
-        // Procesamos cada vuelta del registro para las estadísticas
         reg.detalleVueltas.forEach(v => {
             if (v.estado === "Salida" && bandas[v.banda] !== undefined) {
                 bandas[v.banda]++;
@@ -162,12 +158,9 @@ function actualizarContadores(lista) {
         }
     });
 
-    // Actualizamos KPIs principales
     document.getElementById('contador-en-ruta').innerText = enRuta;
     document.getElementById('contador-disponibles').innerText = disponibles;
     document.getElementById('total-vueltas-dia').innerText = totalVueltasDia;
-
-    // Actualizamos KPIs de bandas horarias
     document.getElementById('banda-10-14').innerText = bandas["10-14"];
     document.getElementById('banda-13-16').innerText = bandas["13-16"];
     document.getElementById('banda-16-19').innerText = bandas["16-19"];
@@ -176,53 +169,36 @@ function actualizarContadores(lista) {
 
 // --- 4. MODAL ---
 
-/**
- * ABRE EL MODAL Y CARGA LOS DATOS DE LAS 4 VUELTAS
- * Incluye validación visual para la 4ta vuelta (Extra)
- */
 window.abrirGestionVueltas = async function(idFirebase) {
-    // 1. Asignamos el ID global para saber qué registro estamos editando
     registroActualId = idFirebase; 
-    
-    // 2. Obtenemos los datos frescos de la base de datos para la fecha seleccionada
     const registros = await obtenerRegistrosPorFecha(fechaInput.value);
     const registro = registros.find(r => r.idFirebase === idFirebase);
 
-    // 3. Validación de seguridad por si el registro fue eliminado mientras se abría
     if (!registro) return mostrarNotificacion("Error: Registro no encontrado", "error");
 
-    // 4. Seteamos el encabezado del modal con el ID de la unidad
     document.getElementById('modal-id-unidad').innerText = registro.unidad;
-    vueltasContainer.innerHTML = ""; // Limpiamos el contenedor para evitar duplicados
+    vueltasContainer.innerHTML = ""; 
 
-    // 5. Construcción dinámica de los 4 bloques de vueltas
     for (let i = 1; i <= 4; i++) {
-        // Clonamos el contenido del template HTML
         const clon = templateVuelta.content.cloneNode(true);
         const dataExistente = registro.detalleVueltas.find(v => v.nro === i);
-        
-        // Referenciamos el contenedor del bloque para aplicar estilos
         const bloqueVuelta = clon.querySelector('.vuelta-bloque');
         clon.querySelector('.nro-v').innerText = i;
 
-        // LÓGICA DE NEGOCIO: Estilo diferencial para la 4ª vuelta (Extra)
         if (i === 4) {
-            bloqueVuelta.style.border = "2px dashed #E30613"; // Rojo para advertencia de extra
+            bloqueVuelta.style.border = "2px dashed #E30613";
             clon.querySelector('h4').innerText = "4ª VUELTA (SOLO EXTRA)";
         }
 
-        // 6. Si ya existen datos guardados en Firebase para esta vuelta, los precargamos
         if (dataExistente) {
             clon.querySelector('.m-banda').value = dataExistente.banda;
             clon.querySelector('.m-zona').value = dataExistente.zona;
             clon.querySelector('.m-estado').value = dataExistente.estado;
+            clon.querySelector('.m-obs').value = dataExistente.observaciones || "";
         }
 
-        // 7. Insertamos el bloque en el contenedor del modal
         vueltasContainer.appendChild(clon);
     }
-
-    // 8. Mostramos el modal al usuario
     modal.style.display = 'block';
 };
 
@@ -237,18 +213,14 @@ document.getElementById('btn-actualizar-vueltas').onclick = async () => {
         const estado = bloque.querySelector('.m-estado').value;
         const obs = bloque.querySelector('.m-obs').value.trim();
 
-        // Solo guardamos si se seleccionó una banda y un estado
         if (banda !== "---" && estado !== "---") {
-            if (estado === "Salida") {
-                vueltasContadas++;
-            }
-
+            if (estado === "Salida") vueltasContadas++;
             nuevasVueltas.push({
                 nro: index + 1,
                 banda: banda,
                 zona: zona,
                 estado: estado,
-                observaciones: obs // Se guarda siempre (sea Salida o Libre)
+                observaciones: obs
             });
         }
     });
@@ -258,32 +230,61 @@ document.getElementById('btn-actualizar-vueltas').onclick = async () => {
             detalleVueltas: nuevasVueltas,
             vueltasTotales: vueltasContadas
         });
-
-        mostrarNotificacion("Jornada actualizada correctamente", "success");
+        mostrarNotificacion("Jornada actualizada", "success");
         modal.style.display = 'none';
         cargarJornada(); 
     } catch (error) {
-        console.error("Error al guardar:", error);
-        mostrarNotificacion("Error crítico al guardar en Firebase", "error");
+        mostrarNotificacion("Error al guardar", "error");
     }
 };
 
 const btnCerrar = document.getElementById('btn-cerrar-modal');
 if (btnCerrar) btnCerrar.onclick = () => modal.style.display = 'none';
 
-/**
- * ELIMINACIÓN CORREGIDA (Importante: debe existir eliminarRegistro en db-operations.js)
- */
 window.eliminarUnidadJornada = async function(idFirebase, nroUnidad) {
     if (!confirm(`¿Estás seguro de eliminar la unidad ${nroUnidad}?`)) return;
-
     try {
         await eliminarRegistro(idFirebase);
         mostrarNotificacion(`Unidad ${nroUnidad} eliminada`, "success");
         cargarJornada(); 
     } catch (error) {
-        console.error("Error al eliminar:", error);
         mostrarNotificacion("Error al intentar eliminar", "error");
+    }
+};
+
+// --- 5. LÓGICA DE CIERRE DE JORNADA ---
+
+document.getElementById('btn-finalizar-jornada').onclick = async () => {
+    const confirmar = confirm("¿Estás seguro de cerrar la jornada? Esto archivará todos los movimientos y limpiará el panel.");
+    if (!confirmar) return;
+
+    try {
+        const btn = document.getElementById('btn-finalizar-jornada');
+        btn.disabled = true;
+        btn.innerText = "ARCHIVANDO...";
+
+        const registrosActivos = await obtenerRegistrosActivos();
+
+        if (registrosActivos.length === 0) {
+            mostrarNotificacion("No hay registros activos para cerrar", "error");
+            btn.disabled = false;
+            btn.innerText = "FINALIZAR JORNADA";
+            return;
+        }
+
+        const promesasCierre = registrosActivos.map(reg => {
+            return actualizarRegistro(reg.idFirebase, { archivado: true });
+        });
+
+        await Promise.all(promesasCierre);
+        mostrarNotificacion("Jornada finalizada", "success");
+        
+        cargarJornada(); // Esto limpiará la tabla porque filtrar por archivado: false
+        btn.disabled = false;
+        btn.innerText = "FINALIZAR JORNADA";
+    } catch (error) {
+        console.error(error);
+        mostrarNotificacion("Error al finalizar jornada", "error");
     }
 };
 

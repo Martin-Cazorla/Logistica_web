@@ -7,7 +7,7 @@ import {
     addDoc, 
     getDocs, 
     query, 
-    where, // Necesario para filtrar por fecha
+    where, 
     orderBy, 
     doc, 
     updateDoc, 
@@ -17,11 +17,13 @@ import {
 const COLECCION_HISTORIAL = "historialLogistica";
 
 /**
- * Guarda un registro inicial de unidad al dar 'Enter'
+ * Guarda un registro inicial de unidad
  */
 export async function guardarRegistro(datos) {
     try {
-        const docRef = await addDoc(collection(db, COLECCION_HISTORIAL), datos);
+        // Añadimos por defecto el campo archivado en falso para que aparezca en el panel
+        const datosConEstado = { ...datos, archivado: false };
+        const docRef = await addDoc(collection(db, COLECCION_HISTORIAL), datosConEstado);
         return { success: true, id: docRef.id };
     } catch (error) {
         console.error("Error al crear registro inicial:", error);
@@ -30,16 +32,15 @@ export async function guardarRegistro(datos) {
 }
 
 /**
- * OBTIENE LOS REGISTROS DE UNA FECHA ESPECÍFICA
- * Este es el corazón de la sincronización entre turnos.
- * @param {string} fechaSeleccionada - Formato YYYY-MM-DD del input date
+ * OBTIENE LOS REGISTROS DE UNA FECHA ESPECÍFICA QUE NO ESTÉN ARCHIVADOS
  */
 export async function obtenerRegistrosPorFecha(fechaSeleccionada) {
     try {
-        // Creamos una consulta filtrada por el campo 'fecha'
+        // Modificamos la consulta para que solo traiga lo que NO está archivado
         const q = query(
             collection(db, COLECCION_HISTORIAL), 
-            where("fecha", "==", fechaSeleccionada)
+            where("fecha", "==", fechaSeleccionada),
+            where("archivado", "==", false)
         );
         
         const querySnapshot = await getDocs(q);
@@ -55,41 +56,50 @@ export async function obtenerRegistrosPorFecha(fechaSeleccionada) {
 }
 
 /**
- * ACTUALIZA LAS VUELTAS DE UNA UNIDAD
- * Se usará desde el modal para guardar cada vuelta individualmente.
+ * Función necesaria para el Cierre de Jornada Masivo
  */
+export async function obtenerRegistrosActivos() {
+    try {
+        const q = query(
+            collection(db, COLECCION_HISTORIAL), 
+            where("archivado", "==", false)
+        );
+        const querySnapshot = await getDocs(q);
+        return querySnapshot.docs.map(doc => ({
+            idFirebase: doc.id,
+            ...doc.data()
+        }));
+    } catch (error) {
+        console.error("Error al obtener activos:", error);
+        return [];
+    }
+}
+
 export async function actualizarRegistro(id, nuevosDatos) {
     try {
         const docRef = doc(db, COLECCION_HISTORIAL, id);
         await updateDoc(docRef, nuevosDatos);
         return { success: true };
     } catch (error) {
-        console.error("Error al actualizar vueltas:", error);
+        console.error("Error al actualizar:", error);
         throw error;
     }
 }
 
-/**
- * Obtiene todos los registros (Para el historial general/anual)
- */
 export async function obtenerTodosLosRegistros() {
     try {
         const q = query(collection(db, COLECCION_HISTORIAL), orderBy("fecha", "desc"));
         const querySnapshot = await getDocs(q);
-        
         return querySnapshot.docs.map(doc => ({
             idFirebase: doc.id,
             ...doc.data()
         }));
     } catch (error) {
-        console.error("Error al obtener historial completo:", error);
+        console.error("Error al obtener historial:", error);
         return [];
     }
 }
 
-/**
- * Elimina un registro (Corrección de errores)
- */
 export async function eliminarRegistro(id) {
     try {
         await deleteDoc(doc(db, COLECCION_HISTORIAL, id));

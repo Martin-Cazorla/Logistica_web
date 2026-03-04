@@ -3,16 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Indicadores de Rendimiento - Logística</title>
+    <title>Indicadores Logísticos - TMS</title>
     <link rel="stylesheet" href="../css/styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-
 <body class="indicadores-body">
-    
     <header class="header-principal">
         <div class="header-top">
-            <h1>DASHBOARD DE RENDIMIENTO</h1>
+            <h1>PANEL DE INDICADORES (KPIs)</h1>
+            <button id="btn-logout" class="btn-logout-top">CERRAR SESIÓN</button>
         </div>
         <nav class="navbar">
             <ul>
@@ -23,67 +22,66 @@
         </nav>
     </header>
 
-    <div class="resumen-container">
-        <div class="filtro-grupo-dashboard">
-            <label>FILTRAR POR DÍA:</label>
-            <input type="date" id="filtro-fecha-dashboard" class="input-calendario">
-            <button class="btn-excel" id="btn-aplicar-filtro">FILTRAR</button>
-            <button class="btn-historial" id="btn-quitar-filtro">VER TODO</button>
+    <main class="resumen-container">
+        <div class="tabs-indicadores">
+            <button class="tab-btn active" data-tab="dia">INDICADORES DEL DÍA</button>
+            <button class="tab-btn" data-tab="periodo">INDICADORES MENSUALES / ANUALES</button>
         </div>
-    </div>
 
-    <div class="resumen-container">
-        <div class="kpi-card border-blue">
-            <span class="kpi-label">UNIDADES EN PERIODO</span>
-            <span id="kpi-unidades" class="kpi-value">0</span>
-        </div>  
-        <div class="kpi-card border-green">
-            <span class="kpi-label">PRODUCTIVIDAD x UNIDAD</span>
-            <span id="kpi-productividad" class="kpi-value">0.00</span>
-        </div>  
-        <div class="kpi-card border-yellow">
-            <span class="kpi-label">RATIO DE EXTRAS</span>
-            <span id="kpi-extras" class="kpi-value">0%</span>
-        </div>  
-    </div>
+        <div class="filtros-indicadores">
+            <input type="date" id="fecha-indicador" class="input-fecha-header">
+            
+            <div id="controles-periodo" style="display: none; gap: 15px; align-items: center;">
+                <div class="filtro-grupo">
+                    <label>Mes:</label>
+                    <select id="select-mes">
+                        <option value="01">Enero</option>
+                        <option value="02">Febrero</option>
+                        <option value="03" selected>Marzo</option>
+                        <option value="04">Abril</option>
+                        <option value="05">Mayo</option>
+                        <option value="06">Junio</option>
+                        <option value="07">Julio</option>
+                        <option value="08">Agosto</option>
+                        <option value="09">Septiembre</option>
+                        <option value="10">Octubre</option>
+                        <option value="11">Noviembre</option>
+                        <option value="12">Diciembre</option>
+                    </select>
+                </div>
+                <div class="filtro-grupo">
+                    <label>Año:</label>
+                    <select id="select-anio">
+                        <option value="2026" selected>2026</option>
+                        <option value="2025">2025</option>
+                    </select>
+                </div>
+            </div>
+        </div>
 
-    <div class="resumen-container dashboard-grafico">
-        <canvas id="graficoVueltas" width="400" height="150"></canvas>
-    </div>
-    
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, query } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        <section class="kpis" style="margin-bottom: 20px;">
+            <div class="kpi-card">
+                <span class="kpi-label">UNIDADES TOTALES</span>
+                <span id="total-unidades-kpi" class="kpi-value">0</span>
+            </div>
+            <div class="kpi-card" style="border-left-color: #E30613;">
+                <span class="kpi-label">UNIDADES CON EXTRA (4ta V)</span>
+                <span id="total-extras-kpi" class="kpi-value">0</span>
+            </div>
+        </section>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBa1n9yQJ33viJ_3P-99yuL4-fzQFzLPIs", 
-            authDomain: "logistica-envios-44bf6.firebaseapp.com",
-            projectId: "logistica-envios-44bf6",
-            storageBucket: "logistica-envios-44bf6.firebasestorage.app",
-            messagingSenderId: "611013572218",
-            appId: "1:611013572218:web:beb687be674a65ceafadc3",
-            measurementId: "G-V14SKXYCJ5"
-        };
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h3>Carga por Banda Horaria</h3>
+                <canvas id="chartBandas"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3 id="titulo-grafico-secundario">Estado de la Flota</h3>
+                <canvas id="chartFlota"></canvas>
+            </div>
+        </div>
+    </main>
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                window.db = db;
-                window.firestoreLib = { collection, getDocs, query };  
-                if (typeof window.obtenerDatos === "function") {
-                    window.obtenerDatos();
-                }
-            } else {
-                window.location.href = "../login.html";
-            }
-        });
-    </script>  
-    <script src="../config.js"></script>
-    <script type="module" src="../indicadores.js"></script>
+    <script type="module" src="../js/pages/indicadores-handler.js"></script>
 </body>
-
 </html>

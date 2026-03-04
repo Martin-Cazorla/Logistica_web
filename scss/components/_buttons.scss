@@ -1,54 +1,65 @@
 /**
- * _buttons.scss - Lógica de componentes reutilizables
+ * _buttons.scss - Lógica de componentes unificada y profesional
  */
 
 @mixin button-styles($bg) {
-    padding: 10px 20px;
+    padding: 12px 24px;
     border: none;
-    border-radius: $border-radius;
+    border-radius: $border-radius; // 8px según nuestras variables
     background-color: $bg;
     color: $white;
     cursor: pointer;
-    font-weight: bold;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     transition: all 0.3s ease;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 4px 6px rgba($bg, 0.2); // Sombra dinámica según el color de fondo
     
     &:hover {
         filter: brightness(1.1);
-        transform: translateY(-1px);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba($bg, 0.3);
     }
     
     &:active {
         transform: translateY(0);
+        box-shadow: 0 2px 4px rgba($bg, 0.2);
     }
 
     &:disabled {
         background-color: #ccc;
+        color: #666;
         cursor: not-allowed;
         transform: none;
+        box-shadow: none;
     }
 }
 
-// Implementación de botones usando las variables semánticas
+// 1. Botón de Éxito (Excel / Confirmar)
 .btn-excel { 
     @include button-styles($color-success); 
 }
 
-.btn-limpiar, .btn-borrar-fila { 
-    @include button-styles($color-danger); 
+// 2. Botón de Alerta / Peligro (Limpiar, Finalizar Jornada, Borrar)
+.btn-limpiar, .btn-borrar-fila, .btn-finalizar-jornada { 
+    @include button-styles($accent-color); 
 }
 
-.btn-logout-top { 
+// 3. Botón Primario (Gestión, Guardar, Logout)
+.btn-guardar, .btn-archivar, .btn-logout-top { 
     @include button-styles($primary-color); 
+}
+
+// 4. Botón de Salida/Secundario
+.btn-logout-top {
     font-size: 0.8rem;
+    padding: 8px 16px; // Un poco más pequeño para el header
 }
 
-.btn-guardar, .btn-archivar { 
-    @include button-styles($primary-color); 
-}
-
+// 5. Botón de Cancelación
 .btn-cancelar {
-    @include button-styles(#6c757d); // Gris neutro para cancelación
+    @include button-styles(#6c757d);
 }

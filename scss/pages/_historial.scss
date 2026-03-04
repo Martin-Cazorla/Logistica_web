@@ -1,0 +1,114 @@
+/**
+ * _historial.scss - Estilos para la auditoría y consulta de datos
+ */
+
+.historial-body {
+    background-color: $bg-color;
+}
+
+// 1. Contenedor de Filtros y KPIs
+.filtros-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    background-color: lighten($bg-color, 2%);
+    padding: 20px;
+    border-radius: $border-radius;
+    border: 1px solid $border-color;
+    margin-bottom: 20px;
+    align-items: flex-end;
+
+    .filtro-grupo {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: $primary-color;
+            text-transform: uppercase;
+        }
+
+        input {
+            padding: 10px;
+            border: 1px solid $border-color;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            min-width: 200px;
+
+            &:focus {
+                border-color: $primary-color;
+                outline: none;
+                box-shadow: 0 0 0 2px rgba($primary-color, 0.1);
+            }
+        }
+    }
+}
+
+// 2. Estilo específico para la tabla de historial
+.tabla-logistica {
+    // Hereda los estilos base, pero personalizamos celdas críticas
+    td {
+        font-size: 0.85rem;
+        
+        // Columna de Resumen de Vueltas (Celda de datos técnicos)
+        &:nth-child(6) {
+            max-width: 300px;
+            color: #555;
+            line-height: 1.4;
+            font-family: 'Courier New', Courier, monospace; // Estilo de log técnico
+        }
+    }
+
+    // Badge para resaltar el número de vueltas
+    .vueltas-badge {
+        background-color: $primary-color;
+        color: $white;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-weight: bold;
+    }
+}
+
+// 3. Botones de Acción en Historial
+.acciones-botones {
+    margin: 20px 0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+
+    .btn-excel {
+        @include button-styles($color-success);
+        // El icono de descarga o Limpiar ya se hereda del mixin
+    }
+
+    .btn-limpiar {
+        @include button-styles(#6c757d); // Gris para "Limpiar Filtros"
+    }
+}
+
+// 4. Modal de Edición en Historial (Ajuste de scroll)
+#modalEditar {
+    .modal-content {
+        max-width: 500px;
+        
+        .form-group {
+            margin-bottom: 15px;
+            
+            label {
+                display: block;
+                margin-bottom: 5px;
+                font-size: 0.85rem;
+                font-weight: 600;
+            }
+            
+            input, select {
+                width: 100%;
+                padding: 10px;
+                border: 1px solid $border-color;
+                border-radius: 4px;
+            }
+        }
+    }
+}
