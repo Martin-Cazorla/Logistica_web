@@ -26,18 +26,37 @@
 
     <main class="resumen-container">
         <section class="kpis" aria-label="Indicadores clave de desempeño">
-                <div class="kpi-card">
-                    <span class="kpi-label">EN RUTA</span>
-                    <span id="contador-en-ruta" class="kpi-value">0</span>
-                </div>
-                <div class="kpi-card">
-                    <span class="kpi-label">DISPONIBLES (< 3 vtas)</span>
-                    <span id="contador-disponibles" class="kpi-value">0</span>
-                </div>
-                <div class="kpi-card">
-                    <span class="kpi-label">VUELTAS TOTALES</span>
-                    <span id="total-vueltas-dia" class="kpi-value">0</span>
-                </div>
+            <div class="kpi-card">
+                <span class="kpi-label">EN RUTA</span>
+                <span id="contador-en-ruta" class="kpi-value">0</span>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-label">DISPONIBLES (< 3 vtas)</span>
+                <span id="contador-disponibles" class="kpi-value">0</span>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-label">VUELTAS TOTALES</span>
+                <span id="total-vueltas-dia" class="kpi-value">0</span>
+            </div>
+        </section>
+
+        <section class="kpis-secundarios" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 20px;">
+            <div class="kpi-card-small">
+                <span class="kpi-label">10:00 - 14:00</span>
+                <span id="banda-10-14" class="kpi-value-small">0</span>
+            </div>
+            <div class="kpi-card-small">
+                <span class="kpi-label">13:00 - 16:00</span>
+                <span id="banda-13-16" class="kpi-value-small">0</span>
+            </div>
+            <div class="kpi-card-small">
+                <span class="kpi-label">16:00 - 19:00</span>
+                <span id="banda-16-19" class="kpi-value-small">0</span>
+            </div>
+            <div class="kpi-card-small">
+                <span class="kpi-label">19:00 - 21:30</span>
+                <span id="banda-19-21" class="kpi-value-small">0</span>
+            </div>
         </section>
 
         <section class="acciones-botones">   
@@ -71,28 +90,6 @@
             </header>
             
             <div class="vueltas-grid">
-                <template id="template-vuelta">
-                    <div class="vuelta-bloque">
-                        <h4>Vuelta <span class="nro-v"></span></h4>
-                        <div class="m-group">
-                            <label>Banda:</label>
-                            <select class="m-banda">
-                                <option value="10-14">10:00 a 14:00hs</option>
-                                <option value="13-16">13:00 a 16:00hs</option>
-                                <option value="16-19">16:00 a 19:00hs</option>
-                                <option value="19-21">19:00 a 21:00hs</option>
-                            </select>
-                        </div>
-                        <div class="m-group">
-                            <label>Zona:</label>
-                            <select class="m-zona"><option value="Cerca">Cerca</option><option value="Campo">Campo</option></select>
-                        </div>
-                        <div class="m-group">
-                            <label>Estado:</label>
-                            <select class="m-estado"><option value="Salida">Salida</option><option value="Libre">Libre</option></select>
-                        </div>
-                    </div>
-                </template>
                 <div id="vueltas-container"></div>
             </div>
 
@@ -101,6 +98,41 @@
             </footer>
         </div>
     </div>
+
+    <template id="template-vuelta">
+        <div class="vuelta-bloque">
+            <h4>Vuelta <span class="nro-v"></span></h4>
+            <div class="m-group">
+                <label>Banda:</label>
+                <select class="m-banda">
+                    <option value="---">Seleccionar...</option>
+                    <option value="10-14">10:00 a 14:00hs</option>
+                    <option value="13-16">13:00 a 16:00hs</option>
+                    <option value="16-19">16:00 a 19:00hs</option>
+                    <option value="19-21">19:00 a 21:30hs</option>
+                </select>
+            </div>
+            <div class="m-group">
+                <label>Zona:</label>
+                <select class="m-zona">
+                    <option value="Cerca">Cerca</option>
+                    <option value="Campo">Campo</option>
+                </select>
+            </div>
+            <div class="m-group">
+                <label>Estado:</label>
+                <select class="m-estado">
+                    <option value="---">Seleccionar...</option>
+                    <option value="Salida">Salida</option>
+                    <option value="Libre">Libre</option>
+                </select>
+            </div>
+            <div class="m-group">
+                <label>Observaciones:</label>
+                <textarea class="m-obs" placeholder="Ej: Olvidó pedido, salió tarde..." rows="2"></textarea>
+            </div>
+        </div>
+    </template>
 
     <script type="module" src="js/pages/main.js"></script> 
 </body>

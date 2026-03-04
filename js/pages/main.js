@@ -137,33 +137,41 @@ function actualizarContadores(lista) {
     let enRuta = 0;
     let disponibles = 0;
     let totalVueltasDia = 0;
+    
+    // Contadores para bandas horarias
+    const bandas = { "10-14": 0, "13-16": 0, "16-19": 0, "19-21": 0 };
 
     lista.forEach(reg => {
-        // Sumamos las vueltas reales acumuladas en el día
         totalVueltasDia += (reg.vueltasTotales || 0);
+
+        // Procesamos cada vuelta del registro para las estadísticas
+        reg.detalleVueltas.forEach(v => {
+            if (v.estado === "Salida" && bandas[v.banda] !== undefined) {
+                bandas[v.banda]++;
+            }
+        });
 
         const ultimaVuelta = reg.detalleVueltas.length > 0 
             ? reg.detalleVueltas[reg.detalleVueltas.length - 1] 
             : null;
 
-        // LÓGICA DE CLASIFICACIÓN:
         if (ultimaVuelta && ultimaVuelta.estado === "Salida") {
-            // Si la última acción fue salir, está en la calle
             enRuta++;
         } else if (reg.vueltasTotales < 3 && reg.horarioIngreso !== "Ausente") {
-            // Si tiene menos de 3 vueltas y NO está ausente, está disponible para cargar
             disponibles++;
         }
     });
 
-    // Reflejamos los datos en la interfaz
-    const kpiRuta = document.getElementById('contador-en-ruta');
-    const kpiDisp = document.getElementById('contador-disponibles');
-    const kpiVtas = document.getElementById('total-vueltas-dia');
+    // Actualizamos KPIs principales
+    document.getElementById('contador-en-ruta').innerText = enRuta;
+    document.getElementById('contador-disponibles').innerText = disponibles;
+    document.getElementById('total-vueltas-dia').innerText = totalVueltasDia;
 
-    if (kpiRuta) kpiRuta.innerText = enRuta;
-    if (kpiDisp) kpiDisp.innerText = disponibles;
-    if (kpiVtas) kpiVtas.innerText = totalVueltasDia;
+    // Actualizamos KPIs de bandas horarias
+    document.getElementById('banda-10-14').innerText = bandas["10-14"];
+    document.getElementById('banda-13-16').innerText = bandas["13-16"];
+    document.getElementById('banda-16-19').innerText = bandas["16-19"];
+    document.getElementById('banda-19-21').innerText = bandas["19-21"];
 }
 
 // --- 4. MODAL ---
@@ -227,9 +235,10 @@ document.getElementById('btn-actualizar-vueltas').onclick = async () => {
         const banda = bloque.querySelector('.m-banda').value;
         const zona = bloque.querySelector('.m-zona').value;
         const estado = bloque.querySelector('.m-estado').value;
+        const obs = bloque.querySelector('.m-obs').value.trim();
 
-        // REGLA DE ORO: Solo procesamos la vuelta si tiene una Banda y un Estado asignado
-        if (banda !== "" && estado !== "---") {
+        // Solo guardamos si se seleccionó una banda y un estado
+        if (banda !== "---" && estado !== "---") {
             if (estado === "Salida") {
                 vueltasContadas++;
             }
@@ -238,7 +247,8 @@ document.getElementById('btn-actualizar-vueltas').onclick = async () => {
                 nro: index + 1,
                 banda: banda,
                 zona: zona,
-                estado: estado
+                estado: estado,
+                observaciones: obs // Se guarda siempre (sea Salida o Libre)
             });
         }
     });
@@ -246,14 +256,15 @@ document.getElementById('btn-actualizar-vueltas').onclick = async () => {
     try {
         await actualizarRegistro(registroActualId, {
             detalleVueltas: nuevasVueltas,
-            vueltasTotales: vueltasContadas // Ahora esto será 1, 2 o lo que corresponda
+            vueltasTotales: vueltasContadas
         });
 
-        mostrarNotificacion("Datos actualizados", "success");
+        mostrarNotificacion("Jornada actualizada correctamente", "success");
         modal.style.display = 'none';
         cargarJornada(); 
     } catch (error) {
-        mostrarNotificacion("Error al guardar", "error");
+        console.error("Error al guardar:", error);
+        mostrarNotificacion("Error crítico al guardar en Firebase", "error");
     }
 };
 
