@@ -1,8 +1,27 @@
-// Importador de base 
-@import 'base';
+// ==========================================================================
+// CONFIGURACIÓN Y BASE 
+// ==========================================================================
+@import 'base/variables'; 
+@import 'base/reset';    
+@import 'base/base';     
 
-// Importador de sectores
-@import 'login';
-@import 'index';
-@import 'historial';
-@import 'indicadores';
+// ==========================================================================
+// LAYOUT 
+// ==========================================================================
+@import 'layout/header'; 
+@import 'layout/nav';    
+@import 'layout/footer'; 
+
+// ==========================================================================
+// COMPONENTES 
+// ==========================================================================
+@import 'components/buttons'; 
+@import 'components/modals';
+
+// ==========================================================================
+// PÁGINAS 
+// ==========================================================================
+@import 'pages/index';
+@import 'pages/historial';
+@import 'pages/indicadores'; 
+@import 'pages/login';

@@ -1,0 +1,80 @@
+/**
+ * _index.scss - Estilos específicos del Panel de Carga
+ */
+
+.resumen-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    background-color: $white;
+    margin-bottom: 30px;
+    box-shadow: $shadow-soft;
+    border-radius: $border-radius;
+}
+
+.kpi-card {
+    text-align: center;
+    border-left: 5px solid $primary-color;
+    padding: 15px;
+    background-color: lighten($bg-color, 2%);
+
+    .kpi-label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: lighten($text-color, 20%);
+        margin-bottom: 5px;
+    }
+
+    .kpi-value {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: $primary-color;
+    }
+}
+
+.tabla-logistica {
+    width: 100%;
+    background-color: $white;
+    border-radius: $border-radius;
+    overflow: hidden;
+
+    th {
+        background-color: $primary-color;
+        color: $white;
+        padding: 12px 8px;
+        font-size: 0.9rem;
+    }
+
+    td {
+        padding: 10px 5px;
+        border-bottom: 1px solid $border-color;
+    }
+
+    input, select {
+        width: 100%;
+        padding: 6px;
+        border: 1px solid $border-color;
+        border-radius: 4px;
+        font-size: 0.9rem;
+
+        &:focus {
+            border-color: $primary-color; // Cambiado de amarillo a azul
+            outline: none;
+            box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
+        }
+    }
+
+    .input-estado {
+        &[value="Salida"] { color: $color-success; font-weight: bold; }
+        &[value="Libre"] { color: $primary-color; font-style: italic; }
+    }
+}
+
+.acciones-botones {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    align-items: center;
+}

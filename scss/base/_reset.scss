@@ -1,0 +1,30 @@
+/**
+ * _reset.scss - Limpieza de estilos de navegador
+ */
+*, *::before, *::after {
+    box-sizing: border-box; // Fundamental para que el padding no afecte el ancho
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+    word-break: normal;
+    -moz-tab-size: 4;
+    tab-size: 4;
+}
+
+button, input, select, textarea {
+    font-family: inherit;
+    font-size: 100%;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}

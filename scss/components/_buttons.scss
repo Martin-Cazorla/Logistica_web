@@ -1,0 +1,54 @@
+/**
+ * _buttons.scss - Lógica de componentes reutilizables
+ */
+
+@mixin button-styles($bg) {
+    padding: 10px 20px;
+    border: none;
+    border-radius: $border-radius;
+    background-color: $bg;
+    color: $white;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    
+    &:hover {
+        filter: brightness(1.1);
+        transform: translateY(-1px);
+    }
+    
+    &:active {
+        transform: translateY(0);
+    }
+
+    &:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+        transform: none;
+    }
+}
+
+// Implementación de botones usando las variables semánticas
+.btn-excel { 
+    @include button-styles($color-success); 
+}
+
+.btn-limpiar, .btn-borrar-fila { 
+    @include button-styles($color-danger); 
+}
+
+.btn-logout-top { 
+    @include button-styles($primary-color); 
+    font-size: 0.8rem;
+}
+
+.btn-guardar, .btn-archivar { 
+    @include button-styles($primary-color); 
+}
+
+.btn-cancelar {
+    @include button-styles(#6c757d); // Gris neutro para cancelación
+}

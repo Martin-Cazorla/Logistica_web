@@ -1,0 +1,73 @@
+/**
+ * _login.scss - Estilos de la página de acceso
+ */
+
+.login-body {
+    background: linear-gradient(135deg, $primary-color 0%, darken($primary-color, 15%) 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.login-container {
+    background-color: $white;
+    padding: 40px;
+    border-radius: $border-radius;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+
+    h2 {
+        color: $primary-color;
+        margin-bottom: 10px;
+        font-size: 1.5rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    p {
+        color: #666;
+        margin-bottom: 30px;
+        font-size: 0.9rem;
+    }
+}
+
+.form-group {
+    text-align: left;
+    margin-bottom: 20px;
+
+    label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: $text-color;
+        font-size: 0.85rem;
+    }
+
+    input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid $border-color;
+        border-radius: 4px;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+
+        &:focus {
+            outline: none;
+            border-color: $primary-color;
+            box-shadow: 0 0 0 2px rgba($primary-color, 0.1);
+        }
+    }
+}
+
+#login-error {
+    background-color: rgba($color-danger, 0.1);
+    color: $color-danger !important;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    border: 1px solid $color-danger;
+}

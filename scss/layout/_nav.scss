@@ -1,0 +1,29 @@
+.navbar {
+    background-color: $black;
+    border-radius: $border-radius;
+    margin-bottom: 20px;
+
+    ul {
+        display: flex;
+        list-style: none;
+        justify-content: center;
+    }
+
+    a {
+        display: block;
+        padding: 15px 25px;
+        color: $white;
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+
+        &:hover {
+            background-color: rgba($white, 0.1);
+        }
+
+        &.active {
+            background-color: $primary-color;
+            border-bottom: 3px solid $accent-color; // Rojo, nunca amarillo
+        }
+    }
+}

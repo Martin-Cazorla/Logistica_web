@@ -1,0 +1,24 @@
+/**
+ * _variables.scss - Configuración Global
+ */
+
+// 1. Colores de Identidad
+$primary-color: #003366;    // Azul Logística
+$accent-color:  #E30613;    // Rojo 
+$white:         #ffffff;
+$black:         #1a1a1a;
+
+// 2. Colores de Fondo y Texto
+$bg-color:      #f4f7f6;
+$text-color:    #333333;
+$border-color:  #d1d1d1;
+
+// 3. Colores de Estado (Semánticos - SIN AMARILLO)
+$color-success: #28a745;    // Verde
+$color-danger:  #dc3545;    // Rojo
+$color-info:    #17a2b8;    // Cian
+
+// 4. Estructura
+$font-main:      'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+$border-radius:  8px;
+$shadow-soft:    0 4px 6px rgba(0, 0, 0, 0.1);

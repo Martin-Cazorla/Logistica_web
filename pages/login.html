@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso Logística - E-commerce</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="login-body">
+
+    <main class="login-container">
+        <h2>SISTEMA DE LOGÍSTICA</h2>
+        <p>Por favor, inicie sesión para continuar</p>
+        
+        <div class="form-group">
+            <label for="login-email">Email:</label>
+            <input type="email" id="login-email" placeholder="usuario@supermercado.com">
+        </div>
+        
+        <div class="form-group">
+            <label for="login-pass">Contraseña:</label>
+            <input type="password" id="login-pass" placeholder="******">
+        </div>
+
+        <button class="btn-excel" id="btn-entrar" style="width: 100%; margin-top: 10px;">INGRESAR</button>
+        <p id="login-error" style="color: red; display: none; margin-top: 10px;"></p>
+    </main>
+
+    <script type="module" src="../js/pages/login-handler.js"></script>
+</body>
+</html>

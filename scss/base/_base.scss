@@ -1,0 +1,38 @@
+/**
+ * _base.scss - Estilos globales de etiquetas
+ */
+body {
+    font-family: $font-main;
+    background-color: $bg-color;
+    color: $text-color;
+    line-height: 1.5;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+h1 {
+    color: $primary-color; // Usamos el azul logística
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background-color: rgba($white, 0.9);
+    padding: 15px;
+    border-radius: $border-radius;
+    box-shadow: $shadow-soft;
+    margin-bottom: 30px;
+}
+
+// Utilidad para fondos de página (mantenemos tu lógica bg-config)
+.bg-config {
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+}
+
+// Configuración de enlaces generales
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: 0.3s;
+}
