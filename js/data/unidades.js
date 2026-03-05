@@ -9,7 +9,7 @@ export async function obtenerUnidades() {
 
     try {
         // Importante: la ruta debe ser relativa a la raíz o al archivo
-        const response = await fetch('data/unidades.json'); 
+        const response = await fetch('./unidades.json'); 
         if (!response.ok) throw new Error("No se pudo cargar el JSON de unidades.");
         cacheUnidades = await response.json();
         return cacheUnidades;
