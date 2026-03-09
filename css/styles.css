@@ -471,6 +471,29 @@ a {
   border-color: #003366;
   outline: none;
 }
+.tabla-logistica input[type=number] {
+  padding: 2px 5px;
+  width: 50px;
+  text-align: center;
+  font-family: inherit;
+  font-weight: bold;
+  color: #003366;
+  border: 1px solid #d1d1d1;
+  border-radius: 4px;
+}
+.tabla-logistica input[type=number]:focus {
+  border-color: #003366;
+  outline: none;
+  background-color: #fff9e6;
+}
+.tabla-logistica .aviso-discrepancia {
+  display: block;
+  font-size: 0.65rem;
+  color: #d9534f;
+  font-weight: bold;
+  margin-top: 4px;
+  text-transform: uppercase;
+}
 
 .acciones-botones {
   display: flex;
@@ -506,17 +529,13 @@ a {
   font-size: 0.75rem;
 }
 
-.fila-horario-secundario {
-  background-color: rgba(0, 51, 102, 0.03);
-  border-left: 4px solid rgb(0, 127.5, 255);
-}
-
 .fila-finalizada {
   background-color: rgba(40, 167, 69, 0.08) !important;
   opacity: 0.8;
 }
 .fila-finalizada td {
-  color: rgb(25.2173913043, 105.2826086957, 43.5);
+  background-color: transparent !important;
+  color: rgb(25.2173913043, 105.2826086957, 43.5) !important;
 }
 
 .fila-ausente {
@@ -524,12 +543,31 @@ a {
   border-left: 4px solid #E30613;
 }
 .fila-ausente td {
-  color: #E30613;
+  background-color: transparent !important;
+  color: #E30613 !important;
   font-style: italic;
+}
+
+.fila-horario-secundario td {
+  background-color: rgba(0, 51, 102, 0.03) !important;
+}
+.fila-horario-secundario {
+  border-left: 4px solid rgb(0, 127.5, 255);
 }
 
 .fila-electro {
   border-left: 4px solid #E30613;
+}
+
+.vuelta-cargada {
+  background-color: rgba(40, 167, 69, 0.05) !important;
+  border: 1px solid #28a745 !important;
+}
+.vuelta-cargada h4 {
+  color: #28a745;
+}
+.vuelta-cargada h4::after {
+  content: " ✓";
 }
 
 /**

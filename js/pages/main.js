@@ -7,7 +7,7 @@ import {
     obtenerRegistrosPorFecha, 
     actualizarRegistro,
     eliminarRegistro,
-    obtenerRegistrosActivos // Nueva importación para el cierre
+    obtenerRegistrosActivos 
 } from '../firebase/db-operations.js';
 import { obtenerUnidades } from '../data/unidades.js';
 import { mostrarNotificacion } from '../modules/utils.js';
@@ -87,8 +87,7 @@ function renderizarTablaEnVivo(lista) {
         const bFinalizada = b.vueltasTotales >= 3 ? 1 : 0;
         if (aFinalizada !== bFinalizada) return aFinalizada - bFinalizada;
 
-        // 2. Segundo criterio: Horario de Ingreso (10:00hs < 11:00hs)
-        // Usamos localeCompare para strings de hora o una lógica simple
+        // 2. Segundo criterio: Horario de Ingreso
         return a.horarioIngreso.localeCompare(b.horarioIngreso);
     });
 
@@ -103,15 +102,20 @@ function renderizarTablaEnVivo(lista) {
         // --- DETECTAR SI FUE A CAMPO ---
         const fueACampo = reg.detalleVueltas.some(v => v.zona === 'Campo');
 
-        // --- ICONO DE CHECK Y ALERTA DE CAMPO ---
+        // --- ICONOS Y ALERTAS VISUALES ---
         const checkIcon = reg.vueltasTotales >= 3 ? '<span style="color: #28a745; margin-left: 5px;">✅</span>' : '';
         const campoAlert = fueACampo ? '<br><span style="color: #d9534f; font-size: 0.7rem; font-weight: bold;">⚠️ ZONA CAMPO</span>' : '';
 
-        // Estilos de fila (mantenemos los anteriores y sumamos lógica)
+        // --- LÓGICA DE AUDITORÍA ---
+        const discrepancia = reg.vueltasTotales !== reg.detalleVueltas.length;
+        const avisoManual = discrepancia ? '<span class="aviso-discrepancia">⚠️ Modificado manualmente</span>' : '';
+
+        // --- ESTILOS DE FILA ---
         let clasesFila = "";
         if (reg.horarioIngreso === 'Ausente') clasesFila = "fila-ausente";
         else if (reg.vueltasTotales >= 3) clasesFila = "fila-finalizada";
         else if (reg.horarioIngreso === '11:00hs') clasesFila = "fila-horario-secundario";
+        else if (reg.horarioIngreso === 'Electro') clasesFila = "fila-electro";
 
         return `
             <tr class="${clasesFila}">
@@ -121,9 +125,19 @@ function renderizarTablaEnVivo(lista) {
                     ${campoAlert} 
                 </td>
                 <td>${reg.chofer}</td>
+                
                 <td style="text-align:center; font-weight:bold;">
                     ${reg.vueltasTotales} / 4 ${checkIcon}
+                    ${avisoManual} 
                 </td>
+
+                <td style="text-align:center;">
+                    <input type="number" 
+                           min="0" max="4" 
+                           value="${reg.vueltasTotales}" 
+                           onchange="window.corregirVueltasManual('${reg.idFirebase}', this.value)">
+                </td>
+
                 <td>
                     <select onchange="window.cambiarHorarioIngreso('${reg.idFirebase}', this.value)" style="padding: 2px; font-size: 0.85rem;">
                         <option value="10:00hs" ${reg.horarioIngreso === '10:00hs' ? 'selected' : ''}>10:00hs</option>
@@ -143,11 +157,10 @@ function renderizarTablaEnVivo(lista) {
         `;
     }).join('');
 
-    // Fila nueva al final
     html += `
         <tr class="fila-nueva">
             <td><input type="text" class="input-id-unidad" placeholder="ID + Enter"></td>
-            <td colspan="6" style="color: #666; font-style: italic;">Ingrese nueva unidad para iniciar</td>
+            <td colspan="7" style="color: #666; font-style: italic;">Ingrese nueva unidad para iniciar</td>
         </tr>
     `;
 
@@ -155,50 +168,32 @@ function renderizarTablaEnVivo(lista) {
     actualizarContadores(lista);
 }
 
+// --- 4. FUNCIONES GLOBALES (WINDOWS) ---
+
 window.cambiarHorarioIngreso = async (id, nuevoValor) => {
     try {
         await actualizarRegistro(id, { horarioIngreso: nuevoValor });
         mostrarNotificacion("Horario actualizado", "info");
+        cargarJornada();
     } catch (e) {
         mostrarNotificacion("Error al actualizar horario", "error");
     }
 };
 
-function actualizarContadores(lista) {
-    let enRuta = 0;
-    let disponibles = 0;
-    let totalVueltasDia = 0;
-    const bandas = { "10-14": 0, "13-16": 0, "16-19": 0, "19-21": 0 };
-
-    lista.forEach(reg => {
-        totalVueltasDia += (reg.vueltasTotales || 0);
-        reg.detalleVueltas.forEach(v => {
-            if (v.estado === "Salida" && bandas[v.banda] !== undefined) {
-                bandas[v.banda]++;
-            }
-        });
-
-        const ultimaVuelta = reg.detalleVueltas.length > 0 
-            ? reg.detalleVueltas[reg.detalleVueltas.length - 1] 
-            : null;
-
-        if (ultimaVuelta && ultimaVuelta.estado === "Salida") {
-            enRuta++;
-        } else if (reg.vueltasTotales < 3 && reg.horarioIngreso !== "Ausente") {
-            disponibles++;
-        }
-    });
-
-    document.getElementById('contador-en-ruta').innerText = enRuta;
-    document.getElementById('contador-disponibles').innerText = disponibles;
-    document.getElementById('total-vueltas-dia').innerText = totalVueltasDia;
-    document.getElementById('banda-10-14').innerText = bandas["10-14"];
-    document.getElementById('banda-13-16').innerText = bandas["13-16"];
-    document.getElementById('banda-16-19').innerText = bandas["16-19"];
-    document.getElementById('banda-19-21').innerText = bandas["19-21"];
-}
-
-// --- 4. MODAL ---
+window.corregirVueltasManual = async (idFirebase, nuevoValor) => {
+    const cantidad = parseInt(nuevoValor);
+    if (isNaN(cantidad) || cantidad < 0 || cantidad > 4) {
+        mostrarNotificacion("Valor inválido", "error");
+        return;
+    }
+    try {
+        await actualizarRegistro(idFirebase, { vueltasTotales: cantidad });
+        mostrarNotificacion("Vueltas actualizadas", "info");
+        cargarJornada(); 
+    } catch (error) {
+        mostrarNotificacion("Error al guardar", "error");
+    }
+};
 
 window.abrirGestionVueltas = async function(idFirebase) {
     registroActualId = idFirebase; 
@@ -222,16 +217,29 @@ window.abrirGestionVueltas = async function(idFirebase) {
         }
 
         if (dataExistente) {
+            bloqueVuelta.classList.add('vuelta-cargada');
             clon.querySelector('.m-banda').value = dataExistente.banda;
             clon.querySelector('.m-zona').value = dataExistente.zona;
             clon.querySelector('.m-estado').value = dataExistente.estado;
             clon.querySelector('.m-obs').value = dataExistente.observaciones || "";
         }
-
         vueltasContainer.appendChild(clon);
     }
     modal.style.display = 'block';
 };
+
+window.eliminarUnidadJornada = async function(idFirebase, nroUnidad) {
+    if (!confirm(`¿Estás seguro de eliminar la unidad ${nroUnidad}?`)) return;
+    try {
+        await eliminarRegistro(idFirebase);
+        mostrarNotificacion(`Unidad ${nroUnidad} eliminada`, "success");
+        cargarJornada(); 
+    } catch (error) {
+        mostrarNotificacion("Error al intentar eliminar", "error");
+    }
+};
+
+// --- 5. LÓGICA DE BOTONES Y MODAL ---
 
 document.getElementById('btn-actualizar-vueltas').onclick = async () => {
     const bloques = vueltasContainer.querySelectorAll('.vuelta-bloque');
@@ -269,56 +277,49 @@ document.getElementById('btn-actualizar-vueltas').onclick = async () => {
     }
 };
 
-const btnCerrar = document.getElementById('btn-cerrar-modal');
-if (btnCerrar) btnCerrar.onclick = () => modal.style.display = 'none';
-
-window.eliminarUnidadJornada = async function(idFirebase, nroUnidad) {
-    if (!confirm(`¿Estás seguro de eliminar la unidad ${nroUnidad}?`)) return;
-    try {
-        await eliminarRegistro(idFirebase);
-        mostrarNotificacion(`Unidad ${nroUnidad} eliminada`, "success");
-        cargarJornada(); 
-    } catch (error) {
-        mostrarNotificacion("Error al intentar eliminar", "error");
-    }
-};
-
-// --- 5. LÓGICA DE CIERRE DE JORNADA ---
-
 document.getElementById('btn-finalizar-jornada').onclick = async () => {
-    const confirmar = confirm("¿Estás seguro de cerrar la jornada? Esto archivará todos los movimientos y limpiará el panel.");
+    const confirmar = confirm("¿Estás seguro de cerrar la jornada? Esto archivará todos los movimientos.");
     if (!confirmar) return;
 
     try {
         const btn = document.getElementById('btn-finalizar-jornada');
         btn.disabled = true;
         btn.innerText = "ARCHIVANDO...";
-
         const registrosActivos = await obtenerRegistrosActivos();
-
-        if (registrosActivos.length === 0) {
-            mostrarNotificacion("No hay registros activos para cerrar", "error");
-            btn.disabled = false;
-            btn.innerText = "FINALIZAR JORNADA";
-            return;
-        }
-
-        const promesasCierre = registrosActivos.map(reg => {
-            return actualizarRegistro(reg.idFirebase, { archivado: true });
-        });
-
+        const promesasCierre = registrosActivos.map(reg => actualizarRegistro(reg.idFirebase, { archivado: true }));
         await Promise.all(promesasCierre);
         mostrarNotificacion("Jornada finalizada", "success");
-        
-        cargarJornada(); // Esto limpiará la tabla porque filtrar por archivado: false
+        cargarJornada();
         btn.disabled = false;
         btn.innerText = "FINALIZAR JORNADA";
     } catch (error) {
-        console.error(error);
         mostrarNotificacion("Error al finalizar jornada", "error");
     }
 };
 
-window.onclick = (event) => {
-    if (event.target == modal) modal.style.display = "none";
-};
+function actualizarContadores(lista) {
+    let enRuta = 0, disponibles = 0, totalVueltasDia = 0;
+    const bandas = { "10-14": 0, "13-16": 0, "16-19": 0, "19-21": 0 };
+
+    lista.forEach(reg => {
+        totalVueltasDia += (reg.vueltasTotales || 0);
+        reg.detalleVueltas.forEach(v => {
+            if (v.estado === "Salida" && bandas[v.banda] !== undefined) bandas[v.banda]++;
+        });
+        const ultimaVuelta = reg.detalleVueltas.length > 0 ? reg.detalleVueltas[reg.detalleVueltas.length - 1] : null;
+        if (ultimaVuelta && ultimaVuelta.estado === "Salida") enRuta++;
+        else if (reg.vueltasTotales < 3 && reg.horarioIngreso !== "Ausente") disponibles++;
+    });
+
+    document.getElementById('contador-en-ruta').innerText = enRuta;
+    document.getElementById('contador-disponibles').innerText = disponibles;
+    document.getElementById('total-vueltas-dia').innerText = totalVueltasDia;
+    Object.keys(bandas).forEach(b => {
+        const el = document.getElementById(`banda-${b.replace(':', '')}`);
+        if (el) el.innerText = bandas[b];
+    });
+}
+
+const btnCerrar = document.getElementById('btn-cerrar-modal');
+if (btnCerrar) btnCerrar.onclick = () => modal.style.display = 'none';
+window.onclick = (event) => { if (event.target == modal) modal.style.display = "none"; };

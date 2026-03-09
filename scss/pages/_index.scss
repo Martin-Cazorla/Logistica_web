@@ -114,7 +114,7 @@
         vertical-align: middle;
     }
 
-    // Estilos para los selectores dentro de la tabla (Horario de ingreso)
+    // Selectores de horario
     select {
         padding: 5px;
         border-radius: 4px;
@@ -127,6 +127,34 @@
             border-color: $primary-color;
             outline: none;
         }
+    }
+
+    // --- NUEVO: Input de corrección manual ---
+    input[type="number"] {
+        padding: 2px 5px;
+        width: 50px;
+        text-align: center;
+        font-family: inherit;
+        font-weight: bold;
+        color: $primary-color;
+        border: 1px solid $border-color;
+        border-radius: 4px;
+        
+        &:focus {
+            border-color: $primary-color;
+            outline: none;
+            background-color: #fff9e6; 
+        }
+    }
+
+    // Cartel de discrepancia
+    .aviso-discrepancia {
+        display: block;
+        font-size: 0.65rem;
+        color: #d9534f; // Rojo alerta
+        font-weight: bold;
+        margin-top: 4px;
+        text-transform: uppercase;
     }
 }
 
@@ -167,34 +195,48 @@
 }
 // --- NUEVOS ESTADOS VISUALES ---
 
-// Resaltado de horario (10:00hs vs 11:00hs)
-.fila-horario-secundario {
-    background-color: rgba($primary-color, 0.03); // Un tono casi imperceptible para diferenciar bloques
-    border-left: 4px solid lighten($primary-color, 30%); 
-}
+// Modifica estas clases en tu archivo SCSS:
 
-// Unidad que ya completó sus vueltas (>= 3)
 .fila-finalizada {
     background-color: rgba($color-success, 0.08) !important;
     opacity: 0.8;
     
-    td {
-        color: darken($color-success, 15%);
+    td { // Agregamos esto para forzar el color en las celdas
+        background-color: transparent !important; 
+        color: darken($color-success, 15%) !important;
     }
 }
 
-// Unidad Ausente (Rojo)
 .fila-ausente {
-    background-color: rgba($color-danger, 0.1) !important; // Asumiendo que tenés $color-danger
-    border-left: 4px solid #E30613; // Rojo fuerte
+    background-color: rgba($color-danger, 0.1) !important;
+    border-left: 4px solid #E30613;
     
-    td {
-        color: #E30613;
+    td { // Agregamos esto
+        background-color: transparent !important;
+        color: #E30613 !important;
         font-style: italic;
     }
+}
+
+.fila-horario-secundario {
+    td { background-color: rgba($primary-color, 0.03) !important; }
+    border-left: 4px solid lighten($primary-color, 30%); 
 }
 
 // Clase para "Electro" (Azul distinto o un borde)
 .fila-electro {
     border-left: 4px solid $accent-color;
+}
+
+// Clase para resaltar la vuelta completada en el modal
+.vuelta-cargada {
+    background-color: rgba($color-success, 0.05) !important; // Un verde muy sutil
+    border: 1px solid $color-success !important;
+    
+    h4 {
+        color: $color-success;
+        &::after {
+            content: " ✓"; // Un check al lado del título "Vuelta X"
+        }
+    }
 }
