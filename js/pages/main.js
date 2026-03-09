@@ -80,7 +80,19 @@ document.addEventListener('keydown', async (e) => {
 function renderizarTablaEnVivo(lista) {
     if (!tbody) return;
 
-    let html = lista.map(reg => {
+    // --- LÓGICA DE ORDENAMIENTO (SENIOR OPTIMIZATION) ---
+    const listaOrdenada = [...lista].sort((a, b) => {
+        // 1. Prioridad: Unidades con 3 o más vueltas van al FINAL
+        const aFinalizada = a.vueltasTotales >= 3 ? 1 : 0;
+        const bFinalizada = b.vueltasTotales >= 3 ? 1 : 0;
+        if (aFinalizada !== bFinalizada) return aFinalizada - bFinalizada;
+
+        // 2. Segundo criterio: Horario de Ingreso (10:00hs < 11:00hs)
+        // Usamos localeCompare para strings de hora o una lógica simple
+        return a.horarioIngreso.localeCompare(b.horarioIngreso);
+    });
+
+    let html = listaOrdenada.map(reg => {
         const ultimaVuelta = reg.detalleVueltas.length > 0 
             ? reg.detalleVueltas[reg.detalleVueltas.length - 1] 
             : null;
@@ -88,33 +100,29 @@ function renderizarTablaEnVivo(lista) {
         const estadoClase = ultimaVuelta ? ultimaVuelta.estado.toLowerCase() : 'pendiente';
         const estadoTexto = ultimaVuelta ? ultimaVuelta.estado : 'En Espera';
 
-        // --- LÓGICA DE ESTILOS DINÁMICOS (SENIOR REVIEW) ---
-        let clasesFila = "";
-        
-        // 1. Prioridad Máxima: Ausente
-        if (reg.horarioIngreso === 'Ausente') {
-            clasesFila = "fila-ausente";
-        } 
-        // 2. Prioridad Media: Unidad que ya cumplió (3 o más vueltas)
-        else if (reg.vueltasTotales >= 3) {
-            clasesFila = "fila-finalizada";
-        }
-        // 3. Prioridad Estética: Diferenciar horarios
-        else if (reg.horarioIngreso === '11:00hs') {
-            clasesFila = "fila-horario-secundario";
-        }
-        else if (reg.horarioIngreso === 'Electro') {
-            clasesFila = "fila-electro";
-        }
+        // --- DETECTAR SI FUE A CAMPO ---
+        const fueACampo = reg.detalleVueltas.some(v => v.zona === 'Campo');
 
-        // Comentario para Héctor: Usamos Template Literals para inyectar la clase en el <tr>
+        // --- ICONO DE CHECK Y ALERTA DE CAMPO ---
+        const checkIcon = reg.vueltasTotales >= 3 ? '<span style="color: #28a745; margin-left: 5px;">✅</span>' : '';
+        const campoAlert = fueACampo ? '<br><span style="color: #d9534f; font-size: 0.7rem; font-weight: bold;">⚠️ ZONA CAMPO</span>' : '';
+
+        // Estilos de fila (mantenemos los anteriores y sumamos lógica)
+        let clasesFila = "";
+        if (reg.horarioIngreso === 'Ausente') clasesFila = "fila-ausente";
+        else if (reg.vueltasTotales >= 3) clasesFila = "fila-finalizada";
+        else if (reg.horarioIngreso === '11:00hs') clasesFila = "fila-horario-secundario";
+
         return `
             <tr class="${clasesFila}">
                 <td><strong>${reg.unidad}</strong></td>
-                <td>${reg.modelo} <br><small>${reg.tamano}</small></td>
+                <td>
+                    ${reg.modelo} <br><small>${reg.tamano}</small>
+                    ${campoAlert} 
+                </td>
                 <td>${reg.chofer}</td>
                 <td style="text-align:center; font-weight:bold;">
-                    ${reg.vueltasTotales} / 4
+                    ${reg.vueltasTotales} / 4 ${checkIcon}
                 </td>
                 <td>
                     <select onchange="window.cambiarHorarioIngreso('${reg.idFirebase}', this.value)" style="padding: 2px; font-size: 0.85rem;">
@@ -135,7 +143,7 @@ function renderizarTablaEnVivo(lista) {
         `;
     }).join('');
 
-    // Fila para agregar nueva unidad (Mantenemos tu lógica)
+    // Fila nueva al final
     html += `
         <tr class="fila-nueva">
             <td><input type="text" class="input-id-unidad" placeholder="ID + Enter"></td>
