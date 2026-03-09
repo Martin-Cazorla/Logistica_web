@@ -88,12 +88,34 @@ function renderizarTablaEnVivo(lista) {
         const estadoClase = ultimaVuelta ? ultimaVuelta.estado.toLowerCase() : 'pendiente';
         const estadoTexto = ultimaVuelta ? ultimaVuelta.estado : 'En Espera';
 
+        // --- LÓGICA DE ESTILOS DINÁMICOS (SENIOR REVIEW) ---
+        let clasesFila = "";
+        
+        // 1. Prioridad Máxima: Ausente
+        if (reg.horarioIngreso === 'Ausente') {
+            clasesFila = "fila-ausente";
+        } 
+        // 2. Prioridad Media: Unidad que ya cumplió (3 o más vueltas)
+        else if (reg.vueltasTotales >= 3) {
+            clasesFila = "fila-finalizada";
+        }
+        // 3. Prioridad Estética: Diferenciar horarios
+        else if (reg.horarioIngreso === '11:00hs') {
+            clasesFila = "fila-horario-secundario";
+        }
+        else if (reg.horarioIngreso === 'Electro') {
+            clasesFila = "fila-electro";
+        }
+
+        // Comentario para Héctor: Usamos Template Literals para inyectar la clase en el <tr>
         return `
-            <tr>
+            <tr class="${clasesFila}">
                 <td><strong>${reg.unidad}</strong></td>
                 <td>${reg.modelo} <br><small>${reg.tamano}</small></td>
                 <td>${reg.chofer}</td>
-                <td style="text-align:center; font-weight:bold;">${reg.vueltasTotales} / 4</td>
+                <td style="text-align:center; font-weight:bold;">
+                    ${reg.vueltasTotales} / 4
+                </td>
                 <td>
                     <select onchange="window.cambiarHorarioIngreso('${reg.idFirebase}', this.value)" style="padding: 2px; font-size: 0.85rem;">
                         <option value="10:00hs" ${reg.horarioIngreso === '10:00hs' ? 'selected' : ''}>10:00hs</option>
@@ -113,6 +135,7 @@ function renderizarTablaEnVivo(lista) {
         `;
     }).join('');
 
+    // Fila para agregar nueva unidad (Mantenemos tu lógica)
     html += `
         <tr class="fila-nueva">
             <td><input type="text" class="input-id-unidad" placeholder="ID + Enter"></td>

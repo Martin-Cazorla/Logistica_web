@@ -165,3 +165,36 @@
     border-radius: 12px;
     font-size: 0.75rem;
 }
+// --- NUEVOS ESTADOS VISUALES ---
+
+// Resaltado de horario (10:00hs vs 11:00hs)
+.fila-horario-secundario {
+    background-color: rgba($primary-color, 0.03); // Un tono casi imperceptible para diferenciar bloques
+    border-left: 4px solid lighten($primary-color, 30%); 
+}
+
+// Unidad que ya completó sus vueltas (>= 3)
+.fila-finalizada {
+    background-color: rgba($color-success, 0.08) !important;
+    opacity: 0.8;
+    
+    td {
+        color: darken($color-success, 15%);
+    }
+}
+
+// Unidad Ausente (Rojo)
+.fila-ausente {
+    background-color: rgba($color-danger, 0.1) !important; // Asumiendo que tenés $color-danger
+    border-left: 4px solid #E30613; // Rojo fuerte
+    
+    td {
+        color: #E30613;
+        font-style: italic;
+    }
+}
+
+// Clase para "Electro" (Azul distinto o un borde)
+.fila-electro {
+    border-left: 4px solid $accent-color;
+}

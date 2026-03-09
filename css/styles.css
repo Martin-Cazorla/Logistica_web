@@ -506,6 +506,32 @@ a {
   font-size: 0.75rem;
 }
 
+.fila-horario-secundario {
+  background-color: rgba(0, 51, 102, 0.03);
+  border-left: 4px solid rgb(0, 127.5, 255);
+}
+
+.fila-finalizada {
+  background-color: rgba(40, 167, 69, 0.08) !important;
+  opacity: 0.8;
+}
+.fila-finalizada td {
+  color: rgb(25.2173913043, 105.2826086957, 43.5);
+}
+
+.fila-ausente {
+  background-color: rgba(220, 53, 69, 0.1) !important;
+  border-left: 4px solid #E30613;
+}
+.fila-ausente td {
+  color: #E30613;
+  font-style: italic;
+}
+
+.fila-electro {
+  border-left: 4px solid #E30613;
+}
+
 /**
  * _historial.scss - Estilos para la auditoría y consulta de datos
  */
